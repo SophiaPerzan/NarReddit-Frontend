@@ -1,6 +1,6 @@
 <script lang="ts">
 	import SignIn from '$lib/components/signin.svelte';
-
+	import Icon from '@iconify/svelte';
 	import { user } from '$lib/firebase';
 	import type { PageData } from './$types';
 
@@ -12,6 +12,4 @@
 	}
 </script>
 
-<div class="flex flex-col justify-center items-center min-h-screen">
-	<SignIn class="" />
-</div>
+<SignIn class="opacity-90" />

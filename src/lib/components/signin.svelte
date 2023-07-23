@@ -68,8 +68,7 @@
 </script>
 
 <div
-	class="join join-vertical w-max bg-primary border border-base-300 text-primary-content text-center {$$props.class ||
-		''}"
+	class="join join-vertical w-max bg-primary text-primary-content text-center {$$props.class || ''}"
 >
 	<div class="collapse join-item border border-base-300">
 		<input type="radio" name="my-accordion-4" checked={true} />
