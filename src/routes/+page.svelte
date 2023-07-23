@@ -6,6 +6,7 @@
 	const buttonText = 'Get Started';
 	const buttonUrl = '/signin';
 	const videoUrl = '/mc720.webm';
+	const videoUrlHQ = '/mc1080.webm';
 </script>
 
-<HeroVideo {title} {buttonText} {buttonUrl} {videoUrl} {description} />
+<HeroVideo {title} {buttonText} {buttonUrl} {videoUrl} {videoUrlHQ} {description} />
