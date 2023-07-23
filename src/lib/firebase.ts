@@ -1,6 +1,5 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app';
-import { getAnalytics } from 'firebase/analytics';
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
@@ -22,7 +21,12 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+let analytics;
+if (typeof window !== 'undefined') {
+	// This code will only execute in a browser environment
+	const { getAnalytics } = await import('firebase/analytics');
+	analytics = getAnalytics(app);
+}
 export const auth = getAuth();
 export const db = getFirestore();
 export const storage = getStorage();
