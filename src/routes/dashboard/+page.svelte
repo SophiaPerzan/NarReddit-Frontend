@@ -8,7 +8,6 @@
 	function signOutUser() {
 		signOut(auth)
 			.then(() => {
-				alert('Signed out successfully');
 				goto('/');
 			})
 			.catch((error) => {
