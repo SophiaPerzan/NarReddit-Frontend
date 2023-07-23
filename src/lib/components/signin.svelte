@@ -5,7 +5,6 @@
 	import {
 		GoogleAuthProvider,
 		signInWithPopup,
-		signOut,
 		createUserWithEmailAndPassword,
 		signInWithEmailAndPassword
 	} from 'firebase/auth';
@@ -63,6 +62,8 @@
 			.catch((error) => {
 				const errorCode = error.code;
 				const errorMessage = error.message;
+				console.log(errorCode, errorMessage);
+				alert(errorMessage);
 			});
 	};
 </script>
