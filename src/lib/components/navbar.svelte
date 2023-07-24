@@ -45,7 +45,7 @@
 	}
 </script>
 
-<div class="navbar bg-neutral border border-base-300">
+<div class="navbar bg-neutral border border-base-300 mb-8">
 	<div class="navbar-start">
 		<div class="dropdown">
 			<button bind:this={menuElement} class="btn btn-ghost btn-circle">
