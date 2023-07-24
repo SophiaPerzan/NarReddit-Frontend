@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { user } from '$lib/firebase';
+	import Navbar from '$lib/components/navbar.svelte';
 	import Signin from '$lib/components/signin.svelte';
 </script>
 
 {#if $user}
+	<Navbar />
 	<slot />
 {:else}
 	<div class="flex flex-col items-center justify-center h-screen space-y-8 text-center mx-9">
