@@ -22,7 +22,6 @@
 	async function signInWithGoogle() {
 		const provider = new GoogleAuthProvider();
 		await signInWithPopup(auth, provider);
-		console.log($user);
 	}
 
 	function checkPasswords() {
@@ -40,8 +39,6 @@
 		createUserWithEmailAndPassword(auth, email, password)
 			.then((userCredential) => {
 				// Signed in
-				console.log($user);
-				// ...
 			})
 			.catch((error) => {
 				const errorCode = error.code;
@@ -56,8 +53,6 @@
 		signInWithEmailAndPassword(auth, email, password)
 			.then((userCredential) => {
 				// Signed in
-				console.log($user);
-				// ...
 			})
 			.catch((error) => {
 				const errorCode = error.code;
