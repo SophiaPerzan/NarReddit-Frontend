@@ -31,12 +31,13 @@ export const auth = getAuth();
 export const db = getFirestore();
 export const storage = getStorage();
 
+let isLoading = writable(true); // set initial state
+
 /**
  * @returns a store with the current firebase user
  */
 function userStore() {
 	let unsubscribe: () => void;
-
 	if (!auth || !globalThis.window) {
 		console.warn('Auth is not initialized or not in browser');
 		const { subscribe } = writable<User | null>(null);
@@ -48,6 +49,7 @@ function userStore() {
 	const { subscribe } = writable(auth?.currentUser ?? null, (set) => {
 		unsubscribe = onAuthStateChanged(auth, (user) => {
 			set(user);
+			isLoading.set(false); // set isLoading to false when the user state changes
 		});
 
 		return () => unsubscribe();
@@ -59,3 +61,4 @@ function userStore() {
 }
 
 export const user = userStore();
+export { isLoading };
