@@ -65,7 +65,7 @@
 		<div class="dropdown dropdown-end">
 			<button bind:this={profileElement} class="btn btn-ghost btn-circle avatar">
 				<div class="w-10 rounded-full">
-					<img src="https://i.redd.it/v0caqchbtn741.jpg" />
+					<img alt="Mike Wazowski" src="https://i.redd.it/v0caqchbtn741.jpg" />
 				</div>
 			</button>
 			<ul class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-neutral rounded-box w-52">
