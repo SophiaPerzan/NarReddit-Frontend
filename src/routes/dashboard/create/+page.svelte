@@ -46,35 +46,35 @@
 			<span class="label-text">English</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" checked={true} class="checkbox checkbox-sm" />
+			<input type="checkbox" class="checkbox checkbox-sm" />
 			<span class="label-text">Spanish</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" checked={true} class="checkbox checkbox-sm" />
+			<input type="checkbox" class="checkbox checkbox-sm" />
 			<span class="label-text">French</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" checked={true} class="checkbox checkbox-sm" />
+			<input type="checkbox" class="checkbox checkbox-sm" />
 			<span class="label-text">Italian</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" checked={true} class="checkbox checkbox-sm" />
+			<input type="checkbox" class="checkbox checkbox-sm" />
 			<span class="label-text">German</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" checked={true} class="checkbox checkbox-sm" />
+			<input type="checkbox" class="checkbox checkbox-sm" />
 			<span class="label-text">Portuguese</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" checked={true} class="checkbox checkbox-sm" />
+			<input type="checkbox" class="checkbox checkbox-sm" />
 			<span class="label-text">Polish</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" checked={true} class="checkbox checkbox-sm" />
+			<input type="checkbox" class="checkbox checkbox-sm" />
 			<span class="label-text">Hindi</span>
 		</label>
 	</div>
 	<div>
-		<input type="submit" value="Submit" class="btn btn-outline btn-wide mt-4" />
+		<input type="submit" value="Create!" class="btn btn-outline btn-wide mt-4" />
 	</div>
 </form>
