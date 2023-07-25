@@ -103,7 +103,7 @@
 	</div>
 </form>
 {#if form?.id}
-	<div class="alert alert-success max-w-sm w-auto py-1 px-4">
+	<div class="alert alert-success max-w-sm w-auto py-1 px-4 absolute right-4 bottom-2">
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			class="stroke-current shrink-0 h-6 w-6"
