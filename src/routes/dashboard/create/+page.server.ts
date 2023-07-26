@@ -13,8 +13,10 @@ export const actions = {
 		const maxPostLength = data.get('MAX_POST_LENGTH') as string;
 		const subtitles = (data.get('SUBTITLES') as string) === 'on' ? true : false;
 		const randomStart = (data.get('RANDOM_START_TIME') as string) === 'on' ? true : false;
+		const bgVideoFileName = data.get('BG_VIDEO_FILENAME') as string;
 		const languages = data.getAll('LANGUAGES') as string[];
 		const languagesString = languages.join(',');
+		const allowedBGVideoFileNames = ['MCParkour.mp4', 'RANDOM'];
 		const allowedLanguages = [
 			'ENGLISH',
 			'SPANISH',
@@ -89,6 +91,20 @@ export const actions = {
 				RANDOM_START_TIME: randomStart
 			};
 		}
+		if (bgVideoFileName === null) {
+			return {
+				error: 'Must select a background video',
+				SUBTITLES: subtitles,
+				RANDOM_START_TIME: randomStart
+			};
+		}
+		if (!allowedBGVideoFileNames.includes(bgVideoFileName)) {
+			return {
+				error: 'Must enter a valid background video',
+				SUBTITLES: subtitles,
+				RANDOM_START_TIME: randomStart
+			};
+		}
 		if (languages.length === 0) {
 			return {
 				error: 'Must select at least one language',
@@ -113,6 +129,31 @@ export const actions = {
 			}
 		}
 
-		return { id: 7, SUBTITLES: subtitles, RANDOM_START_TIME: randomStart };
+		const response = await fetch('http://localhost:5000/create', {
+			method: 'POST',
+			body: JSON.stringify({
+				SUBREDDIT: subreddit,
+				MIN_POST_LENGTH: minPostLength,
+				MAX_POST_LENGTH: maxPostLength,
+				SUBTITLES: subtitles,
+				RANDOM_START_TIME: randomStart,
+				BG_VIDEO_FILENAME: bgVideoFileName,
+				LANGUAGES: languagesString
+			}),
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+
+		console.log(response);
+
+		const { message, task_id } = await response.json();
+
+		return {
+			id: task_id,
+			message: message,
+			SUBTITLES: subtitles,
+			RANDOM_START_TIME: randomStart
+		};
 	}
 } satisfies Actions;

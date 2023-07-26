@@ -131,9 +131,9 @@
 		>
 	</div>
 {/if}
-{#if form?.id && showAlert}
+{#if form?.id && form?.message && showAlert}
 	<div in:fade={{ delay: 600 }} out:fade>
-		<DashboardAlert content="Success! ID: {form.id}" type="success"
+		<DashboardAlert content="{form.message}, ID: {form.id}" type="success"
 			><svg
 				xmlns="http://www.w3.org/2000/svg"
 				class="stroke-current shrink-0 h-6 w-6"
