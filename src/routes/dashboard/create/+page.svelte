@@ -7,13 +7,17 @@
 	export let form: ActionData;
 	let loading = false;
 	let showAlert = false;
+	const alertTime = 7500;
 
 	$: if (form) {
 		loading = false;
 		showAlert = true;
 		setTimeout(() => {
 			showAlert = false;
-		}, 7500);
+		}, alertTime);
+	}
+	function onSubmit() {
+		loading = true;
 	}
 </script>
 
@@ -21,10 +25,7 @@
 	method="POST"
 	action="?/create"
 	use:enhance
-	on:submit={(e) => {
-		e.preventDefault();
-		loading = true;
-	}}
+	on:submit|preventDefault={onSubmit}
 	class="form-control w-full max-w-sm items-center gap-y-4 text-base-content"
 >
 	<div class="relative">
@@ -81,35 +82,41 @@
 	<div>
 		<h3 class="text-2xl my-2">Languages</h3>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" name="LANGUAGES" checked class="checkbox checkbox-sm" />
+			<input
+				type="checkbox"
+				name="LANGUAGES"
+				value="ENGLISH"
+				checked
+				class="checkbox checkbox-sm"
+			/>
 			<span class="label-text">English</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" name="LANGUAGES" class="checkbox checkbox-sm" />
+			<input type="checkbox" name="LANGUAGES" value="SPANISH" class="checkbox checkbox-sm" />
 			<span class="label-text">Spanish</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" name="LANGUAGES" class="checkbox checkbox-sm" />
+			<input type="checkbox" name="LANGUAGES" value="FRENCH" class="checkbox checkbox-sm" />
 			<span class="label-text">French</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" name="LANGUAGES" class="checkbox checkbox-sm" />
+			<input type="checkbox" name="LANGUAGES" value="ITALIAN" class="checkbox checkbox-sm" />
 			<span class="label-text">Italian</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" name="LANGUAGES" class="checkbox checkbox-sm" />
+			<input type="checkbox" name="LANGUAGES" value="GERMAN" class="checkbox checkbox-sm" />
 			<span class="label-text">German</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" name="LANGUAGES" class="checkbox checkbox-sm" />
+			<input type="checkbox" name="LANGUAGES" value="PORTUGUESE" class="checkbox checkbox-sm" />
 			<span class="label-text">Portuguese</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" name="LANGUAGES" class="checkbox checkbox-sm" />
+			<input type="checkbox" name="LANGUAGES" value="POLISH" class="checkbox checkbox-sm" />
 			<span class="label-text">Polish</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" name="LANGUAGES" class="checkbox checkbox-sm" />
+			<input type="checkbox" name="LANGUAGES" value="HINDI" class="checkbox checkbox-sm" />
 			<span class="label-text">Hindi</span>
 		</label>
 	</div>
