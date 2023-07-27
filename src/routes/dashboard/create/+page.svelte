@@ -77,6 +77,7 @@
 		<select name="BG_VIDEO_FILENAME" class="select select-bordered" required>
 			<option value="RANDOM" selected>Random</option>
 			<option value="MCParkour.mp4">Minecraft Parkour</option>
+			<option value="SubwaySurfers.mp4">Subway Surfers</option>
 		</select>
 	</div>
 	<div>

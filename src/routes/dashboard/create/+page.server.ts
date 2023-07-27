@@ -145,8 +145,6 @@ export const actions = {
 			}
 		});
 
-		console.log(response);
-
 		const { message, task_id } = await response.json();
 
 		return {
