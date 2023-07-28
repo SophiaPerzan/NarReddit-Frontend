@@ -16,7 +16,7 @@ export const actions = {
 		const bgVideoFileName = data.get('BG_VIDEO_FILENAME') as string;
 		const languages = data.getAll('LANGUAGES') as string[];
 		const languagesString = languages.join(',');
-		const allowedBGVideoFileNames = ['MCParkour.mp4', 'RANDOM'];
+		const allowedBGVideoFileNames = ['MCParkour.mp4', 'SubwaySurfers.mp4', 'RANDOM'];
 		const allowedLanguages = [
 			'ENGLISH',
 			'SPANISH',

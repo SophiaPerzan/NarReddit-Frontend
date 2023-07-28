@@ -15,17 +15,17 @@
 		};
 	});
 
-	function signOutUser() {
-		signOut(auth)
-			.then(() => {
-				goto('/');
-			})
-			.catch((error) => {
-				const errorCode = error.code;
-				const errorMessage = error.message;
-				console.log(errorCode, errorMessage);
-				alert(errorMessage);
-			});
+	async function signOutUser() {
+		try {
+			const res = await fetch('/signin', { method: 'DELETE' });
+			await signOut(auth);
+			goto('/');
+		} catch (error: any) {
+			const errorCode = error.code;
+			const errorMessage = error.message;
+			console.log(errorCode, errorMessage);
+			alert(errorMessage);
+		}
 	}
 	let profileElement: HTMLElement;
 	let menuElement: HTMLElement;

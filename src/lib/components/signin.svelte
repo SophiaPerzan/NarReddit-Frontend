@@ -21,7 +21,17 @@
 
 	async function signInWithGoogle() {
 		const provider = new GoogleAuthProvider();
-		await signInWithPopup(auth, provider);
+		const credential = await signInWithPopup(auth, provider);
+		const idToken = await credential.user.getIdToken();
+
+		const res = await fetch('/signin', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+				// 'CSRF-Token': csrfToken  // HANDLED by sveltekit automatically
+			},
+			body: JSON.stringify({ idToken })
+		});
 	}
 
 	function checkPasswords() {
@@ -34,33 +44,48 @@
 		return true;
 	}
 
-	const signupWithEmail = () => {
+	async function signupWithEmail() {
 		if (!checkPasswords()) return;
-		createUserWithEmailAndPassword(auth, email, password)
-			.then((userCredential) => {
-				// Signed in
-			})
-			.catch((error) => {
-				const errorCode = error.code;
-				const errorMessage = error.message;
-				console.log(errorCode, errorMessage);
-				alert(errorMessage);
-				// ..
-			});
-	};
+		try {
+			const credential = await createUserWithEmailAndPassword(auth, email, password);
+			const idToken = await credential.user.getIdToken();
 
-	const signinWithEmail = () => {
-		signInWithEmailAndPassword(auth, email, password)
-			.then((userCredential) => {
-				// Signed in
-			})
-			.catch((error) => {
-				const errorCode = error.code;
-				const errorMessage = error.message;
-				console.log(errorCode, errorMessage);
-				alert(errorMessage);
+			const res = await fetch('/signin', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+					// 'CSRF-Token': csrfToken  // HANDLED by sveltekit automatically
+				},
+				body: JSON.stringify({ idToken })
 			});
-	};
+		} catch (error: any) {
+			const errorCode = error.code;
+			const errorMessage = error.message;
+			console.log(errorCode, errorMessage);
+			alert(errorMessage);
+		}
+	}
+
+	async function signinWithEmail() {
+		try {
+			const credential = await signInWithEmailAndPassword(auth, email, password);
+			const idToken = await credential.user.getIdToken();
+
+			const res = await fetch('/signin', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+					// 'CSRF-Token': csrfToken  // HANDLED by sveltekit automatically
+				},
+				body: JSON.stringify({ idToken })
+			});
+		} catch (error: any) {
+			const errorCode = error.code;
+			const errorMessage = error.message;
+			console.log(errorCode, errorMessage);
+			alert(errorMessage);
+		}
+	}
 </script>
 
 <div

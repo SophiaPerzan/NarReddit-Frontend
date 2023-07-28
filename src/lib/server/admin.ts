@@ -1,5 +1,6 @@
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
 import {
 	FIREBASE_PROJECT_ID,
 	FIREBASE_CLIENT_EMAIL,
@@ -24,3 +25,4 @@ try {
 
 export const adminDB = getFirestore();
 export const adminAuth = getAuth();
+export const adminStorage = getStorage();
