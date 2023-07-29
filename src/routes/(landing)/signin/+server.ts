@@ -1,4 +1,4 @@
-import { adminAuth } from '$lib/server/admin';
+import { adminAuth, adminDB } from '$lib/server/admin';
 import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -15,6 +15,15 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		const options = { maxAge: expiresIn, httpOnly: true, secure: true, path: '/' };
 
 		cookies.set('__session', cookie, options);
+
+		const docRef = adminDB.collection('users').doc(decodedIdToken.uid);
+		const doc = await docRef.get();
+		if (!doc.exists) {
+			await docRef.set({
+				userID: decodedIdToken.uid,
+				email: decodedIdToken.email
+			});
+		}
 
 		return json({ status: 'signedIn', success: true });
 	} else {
