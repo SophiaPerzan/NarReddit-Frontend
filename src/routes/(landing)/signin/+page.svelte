@@ -1,15 +1,7 @@
 <script lang="ts">
+	import type { PageData } from './$types';
 	import SignIn from '$lib/components/signin.svelte';
-	import Icon from '@iconify/svelte';
-	import { user } from '$lib/firebase';
-
-	import { goto } from '$app/navigation';
-
-	$: if ($user) {
-		goto('/dashboard');
-	}
+	export let data: PageData;
 </script>
 
-{#if !$user}
-	<SignIn class="opacity-90" />
-{/if}
+<SignIn class="opacity-90" />

@@ -1,27 +1,22 @@
 <script lang="ts">
 	import Lineword from '$lib/components/lineword.svelte';
-	import { user } from '$lib/firebase';
 	import { auth } from '$lib/firebase';
 	import {
 		GoogleAuthProvider,
 		signInWithPopup,
 		createUserWithEmailAndPassword,
-		signInWithEmailAndPassword
+		signInWithEmailAndPassword,
+		type UserCredential
 	} from 'firebase/auth';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	let email: string;
 	let password: string;
 	let password2: string = '';
 	let password2Placeholder: string = 'Confirm password';
 	let pass2Err: boolean = false;
 
-	function pass2OnInput() {
-		password2Placeholder = 'Confirm password';
-		pass2Err = false;
-	}
-
-	async function signInWithGoogle() {
-		const provider = new GoogleAuthProvider();
-		const credential = await signInWithPopup(auth, provider);
+	async function checkServerAuth(credential: UserCredential) {
 		const idToken = await credential.user.getIdToken();
 
 		const res = await fetch('/signin', {
@@ -32,6 +27,21 @@
 			},
 			body: JSON.stringify({ idToken })
 		});
+		const data = await res.json();
+		if (data.success) {
+			goto('/dashboard');
+		}
+	}
+
+	function pass2OnInput() {
+		password2Placeholder = 'Confirm password';
+		pass2Err = false;
+	}
+
+	async function signInWithGoogle() {
+		const provider = new GoogleAuthProvider();
+		const credential = await signInWithPopup(auth, provider);
+		checkServerAuth(credential);
 	}
 
 	function checkPasswords() {
@@ -48,16 +58,7 @@
 		if (!checkPasswords()) return;
 		try {
 			const credential = await createUserWithEmailAndPassword(auth, email, password);
-			const idToken = await credential.user.getIdToken();
-
-			const res = await fetch('/signin', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-					// 'CSRF-Token': csrfToken  // HANDLED by sveltekit automatically
-				},
-				body: JSON.stringify({ idToken })
-			});
+			checkServerAuth(credential);
 		} catch (error: any) {
 			const errorCode = error.code;
 			const errorMessage = error.message;
@@ -69,16 +70,7 @@
 	async function signinWithEmail() {
 		try {
 			const credential = await signInWithEmailAndPassword(auth, email, password);
-			const idToken = await credential.user.getIdToken();
-
-			const res = await fetch('/signin', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-					// 'CSRF-Token': csrfToken  // HANDLED by sveltekit automatically
-				},
-				body: JSON.stringify({ idToken })
-			});
+			checkServerAuth(credential);
 		} catch (error: any) {
 			const errorCode = error.code;
 			const errorMessage = error.message;

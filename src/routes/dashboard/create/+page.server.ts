@@ -1,3 +1,4 @@
+import { adminDB } from '$lib/server/admin';
 import type { PageServerLoad } from './$types';
 import type { Actions } from './$types';
 
@@ -6,7 +7,7 @@ export const load = (async () => {
 }) satisfies PageServerLoad;
 
 export const actions = {
-	create: async ({ request }) => {
+	create: async ({ request, locals }) => {
 		const data = await request.formData();
 		const subreddit = data.get('SUBREDDIT') as string;
 		const minPostLength = data.get('MIN_POST_LENGTH') as string;
