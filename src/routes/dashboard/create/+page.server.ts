@@ -1,4 +1,5 @@
 import { adminDB } from '$lib/server/admin';
+import { FieldValue } from 'firebase-admin/firestore';
 import type { PageServerLoad } from './$types';
 import type { Actions } from './$types';
 
@@ -8,6 +9,7 @@ export const load = (async () => {
 
 export const actions = {
 	create: async ({ request, locals }) => {
+		const userID = locals.userID!;
 		const data = await request.formData();
 		const subreddit = data.get('SUBREDDIT') as string;
 		const minPostLength = data.get('MIN_POST_LENGTH') as string;
@@ -130,6 +132,24 @@ export const actions = {
 			}
 		}
 
+		const videoParameters = {
+			SUBREDDIT: subreddit,
+			MIN_POST_LENGTH: minPostLength,
+			MAX_POST_LENGTH: maxPostLength,
+			SUBTITLES: subtitles,
+			RANDOM_START_TIME: randomStart,
+			BG_VIDEO_FILENAME: bgVideoFileName,
+			LANGUAGES: languagesString
+		};
+		const videoDoc = {
+			userID: userID,
+			creationDate: FieldValue.serverTimestamp(),
+			status: 'submitted',
+			videoParameters: videoParameters
+		};
+		let docRef = await adminDB.collection('videos').add(videoDoc);
+		const docID = docRef.id;
+
 		const response = await fetch('http://localhost:5000/create', {
 			method: 'POST',
 			body: JSON.stringify({
@@ -139,7 +159,8 @@ export const actions = {
 				SUBTITLES: subtitles,
 				RANDOM_START_TIME: randomStart,
 				BG_VIDEO_FILENAME: bgVideoFileName,
-				LANGUAGES: languagesString
+				LANGUAGES: languagesString,
+				DOC_ID: docID
 			}),
 			headers: {
 				'Content-Type': 'application/json'
@@ -147,6 +168,13 @@ export const actions = {
 		});
 
 		const { message, task_id } = await response.json();
+
+		if (message === 'Video creation started') {
+			await docRef.update({
+				status: 'processing',
+				taskID: task_id
+			});
+		}
 
 		return {
 			id: task_id,
