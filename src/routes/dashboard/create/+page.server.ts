@@ -2,6 +2,7 @@ import { adminDB } from '$lib/server/admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import type { PageServerLoad } from './$types';
 import type { Actions } from './$types';
+import { NARREDDIT_API_KEY } from '$env/static/private';
 
 export const load = (async () => {
 	return {};
@@ -163,13 +164,14 @@ export const actions = {
 				DOC_ID: docID
 			}),
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
+				'Api-Key': NARREDDIT_API_KEY
 			}
 		});
 
-		const { message, task_id } = await response.json();
+		const { status, task_id } = await response.json();
 
-		if (message === 'Video creation started') {
+		if (status === 'started') {
 			await docRef.update({
 				status: 'processing',
 				taskID: task_id
@@ -177,8 +179,7 @@ export const actions = {
 		}
 
 		return {
-			id: task_id,
-			message: message,
+			status: status,
 			SUBTITLES: subtitles,
 			RANDOM_START_TIME: randomStart
 		};

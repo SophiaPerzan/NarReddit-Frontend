@@ -9,7 +9,7 @@
 			})
 		});
 		const resData = await res.json();
-		data.userVideos[index].status = resData.task_status;
+		data.userVideos[index].status = resData.status;
 	}
 	async function downloadVideo(taskID: string) {
 		const res = await fetch('api/download/', {
