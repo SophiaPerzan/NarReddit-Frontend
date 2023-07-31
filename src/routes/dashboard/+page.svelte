@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	export let data: PageData;
-	async function updateVideo(taskID: string, video: any) {
+	async function updateVideo(taskID: string, index: number) {
 		const res = await fetch('api/status/', {
 			method: 'POST',
 			body: JSON.stringify({
@@ -9,7 +9,7 @@
 			})
 		});
 		const resData = await res.json();
-		video.status = resData.status;
+		data.userVideos[index].status = resData.task_status;
 	}
 	async function downloadVideo(taskID: string) {
 		const res = await fetch('api/download/', {
@@ -64,7 +64,7 @@
 					>
 				{:else}
 					<button
-						on:click={() => updateVideo(video.taskID, video)}
+						on:click={() => updateVideo(video.taskID, index)}
 						class="btn btn-outline btn-secondary">Update status</button
 					>
 				{/if}
