@@ -15,17 +15,17 @@
 		};
 	});
 
-	function signOutUser() {
-		signOut(auth)
-			.then(() => {
-				goto('/');
-			})
-			.catch((error) => {
-				const errorCode = error.code;
-				const errorMessage = error.message;
-				console.log(errorCode, errorMessage);
-				alert(errorMessage);
-			});
+	async function signOutUser() {
+		try {
+			const res = await fetch('/signin', { method: 'DELETE' });
+			await signOut(auth);
+			goto('/');
+		} catch (error: any) {
+			const errorCode = error.code;
+			const errorMessage = error.message;
+			console.log(errorCode, errorMessage);
+			alert(errorMessage);
+		}
 	}
 	let profileElement: HTMLElement;
 	let menuElement: HTMLElement;
@@ -65,7 +65,7 @@
 		<div class="dropdown dropdown-end">
 			<button bind:this={profileElement} class="btn btn-ghost btn-circle avatar">
 				<div class="w-10 rounded-full">
-					<img src="https://i.redd.it/v0caqchbtn741.jpg" />
+					<img alt="Profile" src="/avatar.svg" />
 				</div>
 			</button>
 			<ul class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-neutral rounded-box w-52">

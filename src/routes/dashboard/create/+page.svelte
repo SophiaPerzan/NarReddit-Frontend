@@ -1,80 +1,170 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { ActionData, PageData } from './$types';
+	import { enhance } from '$app/forms';
+	import { fade, slide } from 'svelte/transition';
+	import DashboardAlert from '$lib/components/dashboard-alert.svelte';
 	export let data: PageData;
-	let subreddit = '';
-	let minPostLength = 0;
-	let maxPostLength = 40000;
-	let subtitles = false;
-	let randomizeStart = false;
-	let bgVideoFilename = '';
-	let languages = [];
+	export let form: ActionData;
+	let loading = false;
+	let showAlert = false;
+	const alertTime = 7500;
+
+	$: if (form) {
+		loading = false;
+		showAlert = true;
+		setTimeout(() => {
+			showAlert = false;
+		}, alertTime);
+	}
+	function onSubmit() {
+		loading = true;
+	}
 </script>
 
-<form class="form-control w-full max-w-sm items-center gap-y-4 text-base-content">
+<form
+	method="POST"
+	action="?/create"
+	use:enhance
+	on:submit|preventDefault={onSubmit}
+	class="form-control w-full max-w-sm items-center gap-y-4 text-base-content"
+>
 	<div class="relative">
-		<label class="label"><span class="label-text">Get the top post from</span></label>
+		<span class="label label-text">Get the top post from</span>
 		<h6 class="text-xl absolute -left-5 top-11">r/</h6>
-		<input type="text" placeholder="AmITheAsshole" class="input input-bordered" />
+		<input
+			type="text"
+			name="SUBREDDIT"
+			placeholder="AmITheAsshole"
+			class="input input-bordered"
+			required
+		/>
 	</div>
 	<div>
-		<label class="label"><span class="label-text">Minimum character count</span></label>
-		<input type="number" placeholder="0" class="input input-bordered" />
+		<span class="label label-text">Minimum character count</span>
+		<input
+			type="number"
+			name="MIN_POST_LENGTH"
+			placeholder="0"
+			class="input input-bordered"
+			required
+		/>
 	</div>
 	<div>
-		<label class="label"><span class="label-text">Maximum character count</span></label>
-		<input type="number" placeholder="40,000" class="input input-bordered" />
+		<span class="label label-text">Maximum character count</span>
+		<input
+			type="number"
+			name="MAX_POST_LENGTH"
+			placeholder="40,000"
+			class="input input-bordered"
+			required
+		/>
 	</div>
 	<div class="flex flex-col items-center">
-		<label class="label"><span class="label-text">Add video subtitles</span></label>
-		<input type="checkbox" class="toggle" checked />
+		<span class="label label-text">Add video subtitles</span>
+		<input type="checkbox" name="SUBTITLES" class="toggle" checked={form?.SUBTITLES ?? false} />
 	</div>
 	<div class="flex flex-col items-center">
-		<label class="label"><span class="label-text">Randomized start time</span></label>
-		<input type="checkbox" class="toggle" checked />
+		<span class="label label-text">Randomized start time</span>
+		<input
+			type="checkbox"
+			name="RANDOM_START_TIME"
+			class="toggle"
+			checked={form?.RANDOM_START_TIME ?? false}
+		/>
 	</div>
-	<div class="mt-2">
-		<select class="select select-bordered">
-			<option disabled selected>Background video</option>
-			<option>Random</option>
-			<option>Minecraft Parkour</option>
+	<div>
+		<span class="label label-text">Background video</span>
+		<select name="BG_VIDEO_FILENAME" class="select select-bordered" required>
+			<option value="RANDOM" selected>Random</option>
+			<option value="MCParkour.mp4">Minecraft Parkour</option>
+			<option value="SubwaySurfers.mp4">Subway Surfers</option>
 		</select>
 	</div>
 	<div>
-		<h3 class="text-2xl">Languages</h3>
+		<h3 class="text-2xl my-2">Languages</h3>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" checked={true} class="checkbox checkbox-sm" />
+			<input
+				type="checkbox"
+				name="LANGUAGES"
+				value="ENGLISH"
+				checked
+				class="checkbox checkbox-sm"
+			/>
 			<span class="label-text">English</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" checked={true} class="checkbox checkbox-sm" />
+			<input type="checkbox" name="LANGUAGES" value="SPANISH" class="checkbox checkbox-sm" />
 			<span class="label-text">Spanish</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" checked={true} class="checkbox checkbox-sm" />
+			<input type="checkbox" name="LANGUAGES" value="FRENCH" class="checkbox checkbox-sm" />
 			<span class="label-text">French</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" checked={true} class="checkbox checkbox-sm" />
+			<input type="checkbox" name="LANGUAGES" value="ITALIAN" class="checkbox checkbox-sm" />
 			<span class="label-text">Italian</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" checked={true} class="checkbox checkbox-sm" />
+			<input type="checkbox" name="LANGUAGES" value="GERMAN" class="checkbox checkbox-sm" />
 			<span class="label-text">German</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" checked={true} class="checkbox checkbox-sm" />
+			<input type="checkbox" name="LANGUAGES" value="PORTUGUESE" class="checkbox checkbox-sm" />
 			<span class="label-text">Portuguese</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" checked={true} class="checkbox checkbox-sm" />
+			<input type="checkbox" name="LANGUAGES" value="POLISH" class="checkbox checkbox-sm" />
 			<span class="label-text">Polish</span>
 		</label>
 		<label class="label cursor-pointer nd">
-			<input type="checkbox" checked={true} class="checkbox checkbox-sm" />
+			<input type="checkbox" name="LANGUAGES" value="HINDI" class="checkbox checkbox-sm" />
 			<span class="label-text">Hindi</span>
 		</label>
 	</div>
 	<div>
-		<input type="submit" value="Submit" class="btn btn-outline btn-wide mt-4" />
+		<input type="submit" value="Create!" class="btn btn-outline btn-wide my-4" />
 	</div>
 </form>
+{#if loading}
+	<div in:fade out:fade>
+		<DashboardAlert content="Awaiting response from server" type="info"
+			><span class="loading loading-spinner loading-xs" /></DashboardAlert
+		>
+	</div>
+{/if}
+{#if form?.status && showAlert}
+	<div in:fade={{ delay: 600 }} out:fade>
+		<DashboardAlert content="Video {form.status}" type="success"
+			><svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="stroke-current shrink-0 h-6 w-6"
+				fill="none"
+				viewBox="0 0 24 24"
+				><path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+				/></svg
+			></DashboardAlert
+		>
+	</div>
+{/if}
+{#if form?.error && showAlert}
+	<div in:fade={{ delay: 600 }} out:fade>
+		<DashboardAlert content="Error: {form.error}" type="error"
+			><svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="stroke-current shrink-0 h-6 w-6"
+				fill="none"
+				viewBox="0 0 24 24"
+				><path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+				/></svg
+			></DashboardAlert
+		>
+	</div>
+{/if}
