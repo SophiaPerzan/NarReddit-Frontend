@@ -20,9 +20,9 @@
 	}
 </script>
 
-<div class="card lg:card-side bg-neutral shadow-xl w-auto max-w-sm">
-	<figure><img {src} alt="Video preview" /></figure>
-	<div class="card-body p-6">
+<div class="card lg:card-side bg-neutral shadow-xl mx-1/16 sm:w-96 lg:w-auto lg:h-72">
+	<figure><img class="h-full w-96 lg:w-auto" {src} alt="Video preview" /></figure>
+	<div class="card-body p-6 lg:w-min">
 		<h2 class="card-title">Video {video.status}</h2>
 		<ul class="mb-3">
 			{#each Object.keys(vidParams) as param}
@@ -31,9 +31,8 @@
 		</ul>
 		<div class="card-actions justify-end mt-auto">
 			{#if video.status === 'finished'}
-				<button
-					on:click={() => downloadFunction(video.taskID)}
-					class="btn btn-outline btn-secondary">Download video</button
+				<button on:click={() => downloadFunction(video.taskID)} class="btn btn-outline btn-accent"
+					>Download video</button
 				>
 			{:else}
 				<button
