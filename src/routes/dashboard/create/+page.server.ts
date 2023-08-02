@@ -15,11 +15,13 @@ export const actions = {
 		const subreddit = data.get('SUBREDDIT') as string;
 		const minPostLength = data.get('MIN_POST_LENGTH') as string;
 		const maxPostLength = data.get('MAX_POST_LENGTH') as string;
+		const ttsEngine = data.get('TTS_ENGINE') as string;
 		const subtitles = (data.get('SUBTITLES') as string) === 'on' ? true : false;
 		const randomStart = (data.get('RANDOM_START_TIME') as string) === 'on' ? true : false;
 		const bgVideoFileName = data.get('BG_VIDEO_FILENAME') as string;
 		const languages = data.getAll('LANGUAGES') as string[];
 		const languagesString = languages.join(',');
+		const allowedTTSEngines = ['GOOGLE', 'ELEVENLABS'];
 		const allowedBGVideoFileNames = ['MCParkour.mp4', 'SubwaySurfers.mp4', 'RANDOM'];
 		const allowedLanguages = [
 			'ENGLISH',
@@ -95,6 +97,20 @@ export const actions = {
 				RANDOM_START_TIME: randomStart
 			};
 		}
+		if (ttsEngine === null) {
+			return {
+				error: 'Must select a TTS engine',
+				SUBTITLES: subtitles,
+				RANDOM_START_TIME: randomStart
+			};
+		}
+		if (!allowedTTSEngines.includes(ttsEngine)) {
+			return {
+				error: 'Must enter a valid TTS engine',
+				SUBTITLES: subtitles,
+				RANDOM_START_TIME: randomStart
+			};
+		}
 		if (bgVideoFileName === null) {
 			return {
 				error: 'Must select a background video',
@@ -137,6 +153,7 @@ export const actions = {
 			SUBREDDIT: subreddit,
 			MIN_POST_LENGTH: minPostLength,
 			MAX_POST_LENGTH: maxPostLength,
+			TTS_ENGINE: ttsEngine,
 			SUBTITLES: subtitles,
 			RANDOM_START_TIME: randomStart,
 			BG_VIDEO_FILENAME: bgVideoFileName,
@@ -157,6 +174,7 @@ export const actions = {
 				SUBREDDIT: subreddit,
 				MIN_POST_LENGTH: minPostLength,
 				MAX_POST_LENGTH: maxPostLength,
+				TTS_ENGINE: ttsEngine,
 				SUBTITLES: subtitles,
 				RANDOM_START_TIME: randomStart,
 				BG_VIDEO_FILENAME: bgVideoFileName,
