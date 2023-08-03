@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import VideoCard from '$lib/components/video-card.svelte';
 	export let data: PageData;
 	async function updateVideo(taskID: string, index: number) {
 		const res = await fetch('api/status/', {
@@ -10,6 +11,20 @@
 		});
 		const resData = await res.json();
 		data.userVideos[index].status = resData.status;
+	}
+	async function deleteVideo(taskID: string, index: number) {
+		const res = await fetch('api/delete/', {
+			method: 'POST',
+			body: JSON.stringify({
+				taskID: taskID
+			})
+		});
+		const resData = await res.json();
+		if (resData.status === 'success') {
+			console.log('Deleted video');
+			data.userVideos.splice(index, 1);
+			data.userVideos = data.userVideos;
+		}
 	}
 	async function downloadVideo(taskID: string) {
 		const res = await fetch('api/download/', {
@@ -54,23 +69,19 @@
 
 <div class="flex flex-col items-center gap-4">
 	{#if data.userVideos.length > 0}
-		You have videos!
+		<p>Videos can take approximately 2 minutes per language to generate.</p>
+		<p>Press update status periodically to see if they're done.</p>
 		{#each data.userVideos as video, index (video.taskID)}
-			<div class="flex flex-col text-center bg-base-100">
-				<h3 class="text-background-content text-2xl">{video.status}</h3>
-				{#if video.status === 'finished'}
-					<button on:click={() => downloadVideo(video.taskID)} class="btn btn-outline btn-secondary"
-						>Download video</button
-					>
-				{:else}
-					<button
-						on:click={() => updateVideo(video.taskID, index)}
-						class="btn btn-outline btn-secondary">Update status</button
-					>
-				{/if}
-			</div>
+			<VideoCard
+				deleteFunction={deleteVideo}
+				downloadFunction={downloadVideo}
+				updateFunction={updateVideo}
+				{video}
+				{index}
+			/>
 		{/each}
 	{:else}
-		You have no videos!
+		<p class="text-xl">You have no videos! 😥</p>
+		<p class="text-xl">Create videos in the create tab</p>
 	{/if}
 </div>

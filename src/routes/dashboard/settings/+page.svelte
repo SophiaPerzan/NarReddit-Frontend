@@ -3,3 +3,5 @@
 
 	export let data: PageData;
 </script>
+
+<div class="flex flex-col items-center">Settings!</div>

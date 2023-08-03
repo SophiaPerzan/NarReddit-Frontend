@@ -3,7 +3,6 @@
 	import { enhance } from '$app/forms';
 	import { fade, slide } from 'svelte/transition';
 	import DashboardAlert from '$lib/components/dashboard-alert.svelte';
-	export let data: PageData;
 	export let form: ActionData;
 	let loading = false;
 	let showAlert = false;
@@ -58,6 +57,13 @@
 			class="input input-bordered"
 			required
 		/>
+	</div>
+	<div class="flex flex-col items-center">
+		<span class="label label-text">Text-To-Speech Provider</span>
+		<select name="TTS_ENGINE" class="select select-bordered" required>
+			<option value="GOOGLE" selected>GoogleTTS Standard</option>
+			<option value="ELEVENLABS" disabled>ElevenLabs: disabled</option>
+		</select>
 	</div>
 	<div class="flex flex-col items-center">
 		<span class="label label-text">Add video subtitles</span>

@@ -2,9 +2,14 @@
 	import type { PageData } from './$types';
 	import { user, isLoading } from '$lib/firebase';
 	import Navbar from '$lib/components/navbar.svelte';
+	import Footer from '$lib/components/footer.svelte';
 	import Signin from '$lib/components/signin.svelte';
-	export let data: PageData;
 </script>
 
-<Navbar />
-<slot />
+<div class="flex flex-col min-h-screen">
+	<Navbar />
+	<main class="flex-grow">
+		<slot />
+	</main>
+	<Footer />
+</div>
