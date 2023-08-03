@@ -62,7 +62,7 @@
 		<span class="label label-text">Text-To-Speech Provider</span>
 		<select name="TTS_ENGINE" class="select select-bordered" required>
 			<option value="GOOGLE" selected>GoogleTTS Standard</option>
-			<option value="ELEVENLABS">ElevenLabs</option>
+			<option value="ELEVENLABS" disabled>ElevenLabs: disabled</option>
 		</select>
 	</div>
 	<div class="flex flex-col items-center">

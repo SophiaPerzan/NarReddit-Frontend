@@ -12,6 +12,20 @@
 		const resData = await res.json();
 		data.userVideos[index].status = resData.status;
 	}
+	async function deleteVideo(taskID: string, index: number) {
+		const res = await fetch('api/delete/', {
+			method: 'POST',
+			body: JSON.stringify({
+				taskID: taskID
+			})
+		});
+		const resData = await res.json();
+		if (resData.status === 'success') {
+			console.log('Deleted video');
+			data.userVideos.splice(index, 1);
+			data.userVideos = data.userVideos;
+		}
+	}
 	async function downloadVideo(taskID: string) {
 		const res = await fetch('api/download/', {
 			method: 'POST',
@@ -55,11 +69,17 @@
 
 <div class="flex flex-col items-center gap-4">
 	{#if data.userVideos.length > 0}
-		You have videos!
 		{#each data.userVideos as video, index (video.taskID)}
-			<VideoCard downloadFunction={downloadVideo} updateFunction={updateVideo} {video} {index} />
+			<VideoCard
+				deleteFunction={deleteVideo}
+				downloadFunction={downloadVideo}
+				updateFunction={updateVideo}
+				{video}
+				{index}
+			/>
 		{/each}
 	{:else}
-		You have no videos!
+		<p class="text-xl">You have no videos! 😥</p>
+		<p class="text-xl">Create videos in the create tab</p>
 	{/if}
 </div>

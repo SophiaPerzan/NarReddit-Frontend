@@ -1,7 +1,9 @@
 <script lang="ts">
+	import Icon from '@iconify/svelte';
 	export let video: FirebaseFirestore.DocumentData;
 	export let downloadFunction: (taskID: string) => void;
 	export let updateFunction: (taskID: string, index: number) => void;
+	export let deleteFunction: (taskID: string, index: number) => void;
 	export let index: number;
 	const videoBG = video.videoParameters.BG_VIDEO_FILENAME;
 	const excludedParams = ['MIN_POST_LENGTH', 'MAX_POST_LENGTH'];
@@ -40,12 +42,14 @@
 							<li class="text-sm max-w-xs">{vidParams[param]?.replaceAll(',', ', ')}</li>
 						</ul>
 					</li>
+				{:else if param === 'BG_VIDEO_FILENAME'}
+					<li>Background video: {vidParams[param]?.replace('.mp4', '')}</li>
 				{:else}
 					<li>{param}: {vidParams[param]}</li>
 				{/if}
 			{/each}
 		</ul>
-		<div class="card-actions justify-end mt-auto">
+		<div class="card-actions justify-between mt-auto">
 			{#if video.status === 'finished'}
 				<button on:click={() => downloadFunction(video.taskID)} class="btn btn-outline btn-accent"
 					>Download video</button
@@ -56,6 +60,11 @@
 					class="btn btn-outline btn-secondary">Update status</button
 				>
 			{/if}
+			<button
+				on:click={() => deleteFunction(video.taskID, index)}
+				class="btn btn-outline btn-warning px-3"
+				><Icon class="text-2xl" icon="material-symbols:delete-outline" /></button
+			>
 		</div>
 	</div>
 </div>
