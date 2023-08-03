@@ -69,6 +69,8 @@
 
 <div class="flex flex-col items-center gap-4">
 	{#if data.userVideos.length > 0}
+		<p>Videos can take approximately 2 minutes per language to generate.</p>
+		<p>Press update status periodically to see if they're done.</p>
 		{#each data.userVideos as video, index (video.taskID)}
 			<VideoCard
 				deleteFunction={deleteVideo}
