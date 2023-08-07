@@ -24,8 +24,11 @@ const app = initializeApp(firebaseConfig);
 let analytics;
 if (typeof window !== 'undefined') {
 	// This code will only execute in a browser environment
-	const { getAnalytics } = await import('firebase/analytics');
-	analytics = getAnalytics(app);
+	async function initializeAnalytics() {
+		const { getAnalytics } = await import('firebase/analytics');
+		analytics = getAnalytics(app);
+	}
+	initializeAnalytics();
 }
 export const auth = getAuth();
 export const db = getFirestore();
