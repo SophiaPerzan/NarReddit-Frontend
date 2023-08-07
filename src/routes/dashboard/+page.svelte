@@ -21,7 +21,6 @@
 		});
 		const resData = await res.json();
 		if (resData.status === 'success') {
-			console.log('Deleted video');
 			data.userVideos.splice(index, 1);
 			data.userVideos = data.userVideos;
 		}

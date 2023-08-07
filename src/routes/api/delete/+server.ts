@@ -15,6 +15,5 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 	let doc = snapshot.docs[0];
 	await doc.ref.delete();
-	console.log('Document successfully deleted!');
 	return json({ status: 'success' });
 };
