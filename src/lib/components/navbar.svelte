@@ -8,10 +8,14 @@
 	onMount(() => {
 		window.addEventListener('mousedown', handleMouseDown);
 		window.addEventListener('mouseup', handleMouseUp);
+		profileElement.addEventListener('touchend', profileFocus, { passive: false });
+		menuElement.addEventListener('touchend', menuFocus, { passive: false });
 
 		return () => {
 			window.removeEventListener('mousedown', handleMouseDown);
 			window.removeEventListener('mouseup', handleMouseUp);
+			profileElement.removeEventListener('touchend', profileFocus);
+			menuElement.removeEventListener('touchend', menuFocus);
 		};
 	});
 
@@ -42,6 +46,16 @@
 
 	function handleMouseDown() {
 		mouseDownElement = document.activeElement as HTMLElement;
+	}
+
+	function profileFocus(event: TouchEvent) {
+		event.preventDefault();
+		profileElement.focus();
+	}
+
+	function menuFocus(event: TouchEvent) {
+		event.preventDefault();
+		menuElement.focus();
 	}
 </script>
 
