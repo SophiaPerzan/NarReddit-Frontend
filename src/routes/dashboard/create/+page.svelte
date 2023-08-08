@@ -179,7 +179,7 @@
 {/if}
 {#if form?.status && showAlert && !loading}
 	<div in:fade={{ delay: 600 }} out:fade class="z-10">
-		<DashboardAlert content="Video {form.status}" type="success"
+		<DashboardAlert content="Video {form.status}, check dashboard for details" type="success"
 			><svg
 				xmlns="http://www.w3.org/2000/svg"
 				class="stroke-current shrink-0 h-6 w-6"
