@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import VideoCard from '$lib/components/video-card.svelte';
+	import { slide } from 'svelte/transition';
 	export let data: PageData;
 	async function updateVideo(taskID: string, index: number) {
 		const res = await fetch('api/status/', {
@@ -74,13 +75,15 @@
 		</div>
 
 		{#each data.userVideos as video, index (video.taskID)}
-			<VideoCard
-				deleteFunction={deleteVideo}
-				downloadFunction={downloadVideo}
-				updateFunction={updateVideo}
-				{video}
-				{index}
-			/>
+			<div out:slide>
+				<VideoCard
+					deleteFunction={deleteVideo}
+					downloadFunction={downloadVideo}
+					updateFunction={updateVideo}
+					{video}
+					{index}
+				/>
+			</div>
 		{/each}
 	{:else}
 		<div class="text-center">
