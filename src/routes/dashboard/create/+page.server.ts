@@ -6,7 +6,7 @@ import { NARREDDIT_API_KEY } from '$env/static/private';
 
 import sharp from 'sharp';
 
-const vision = require('@google-cloud/vision');
+import vision from '@google-cloud/vision';
 const client = new vision.ImageAnnotatorClient();
 
 type TextContentInputs = {
@@ -69,13 +69,12 @@ export const actions = {
 		const userID = locals.userID!;
 		const data = await request.formData();
 		const inputs = getFormInputs(data);
-		const validationError = validateInputs(inputs);
+		const validationError = await validateInputs(inputs);
 
 		if (validationError) {
 			return validationError; // This will include the error from the content origin
 		}
 		const languagesString = inputs!.languages.join(',');
-
 		let videoParameters: VideoParameters;
 
 		if (inputs!.contentOrigin === 'text') {
@@ -128,7 +127,6 @@ export const actions = {
 				'Api-Key': NARREDDIT_API_KEY
 			}
 		});
-
 		const { status, task_id } = await response.json();
 
 		if (status === 'started') {
@@ -324,10 +322,10 @@ async function safeSearchPassed(imageBuffer: Buffer) {
 	const detections = result.safeSearchAnnotation;
 	console.log(detections);
 	return (
-		detections.adult === 'VERY_UNLIKELY' &&
-		detections.spoof === 'VERY_UNLIKELY' &&
-		detections.medical === 'VERY_UNLIKELY' &&
-		detections.violence === 'VERY_UNLIKELY' &&
-		detections.racy === 'VERY_UNLIKELY'
+		detections?.adult === 'VERY_UNLIKELY' &&
+		detections?.spoof === 'VERY_UNLIKELY' &&
+		detections?.medical === 'VERY_UNLIKELY' &&
+		detections?.violence === 'VERY_UNLIKELY' &&
+		detections?.racy === 'VERY_UNLIKELY'
 	);
 }
