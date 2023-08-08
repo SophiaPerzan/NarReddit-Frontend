@@ -68,7 +68,7 @@
 
 <div class="flex flex-col items-center gap-4">
 	{#if data.userVideos.length > 0}
-		<div class="text-center mx-4">
+		<div class="text-center">
 			<p>Videos can take approximately 2 minutes per language to generate.</p>
 			<p>Press update status periodically to see if they're done.</p>
 		</div>
@@ -83,7 +83,7 @@
 			/>
 		{/each}
 	{:else}
-		<div class="text-center mx-4">
+		<div class="text-center">
 			<p class="text-xl">You have no videos! 😥</p>
 			<p class="text-xl">Create videos in the create tab</p>
 		</div>

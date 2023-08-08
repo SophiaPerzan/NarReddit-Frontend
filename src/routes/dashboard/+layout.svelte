@@ -8,7 +8,7 @@
 
 <div class="flex flex-col min-h-screen">
 	<Navbar />
-	<main class="flex-grow">
+	<main class="flex-grow flex flex-col items-center gap-4 mx-1/16">
 		<slot />
 	</main>
 	<Footer />
