@@ -4,7 +4,7 @@
 </script>
 
 <div
-	class="alert max-w-sm w-auto py-1 px-4 fixed right-4 bottom-2 flex z-10"
+	class="alert max-w-sm w-auto py-1 px-4 fixed right-4 bottom-2 flex"
 	class:alert-success={type === 'success'}
 	class:alert-error={type === 'error'}
 	class:alert-info={type === 'info'}

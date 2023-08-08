@@ -107,16 +107,11 @@
 	</div>
 	<div class="flex flex-col items-center">
 		<span class="label label-text">Add video subtitles</span>
-		<input type="checkbox" name="SUBTITLES" class="toggle" checked={form?.SUBTITLES ?? false} />
+		<input type="checkbox" name="SUBTITLES" class="toggle" />
 	</div>
 	<div class="flex flex-col items-center">
 		<span class="label label-text">Randomized start time</span>
-		<input
-			type="checkbox"
-			name="RANDOM_START_TIME"
-			class="toggle"
-			checked={form?.RANDOM_START_TIME ?? false}
-		/>
+		<input type="checkbox" name="RANDOM_START_TIME" class="toggle" />
 	</div>
 	<div>
 		<span class="label label-text">Background video</span>
@@ -172,14 +167,14 @@
 	</div>
 </form>
 {#if loading}
-	<div in:fade out:fade>
+	<div in:fade out:fade={{ duration: 350 }} class="z-10">
 		<DashboardAlert content="Awaiting response from server" type="info"
 			><span class="loading loading-spinner loading-xs" /></DashboardAlert
 		>
 	</div>
 {/if}
-{#if form?.status && showAlert}
-	<div in:fade={{ delay: 600 }} out:fade>
+{#if form?.status && showAlert && !loading}
+	<div in:fade={{ delay: 600 }} out:fade class="z-10">
 		<DashboardAlert content="Video {form.status}" type="success"
 			><svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -196,8 +191,8 @@
 		>
 	</div>
 {/if}
-{#if form?.error && showAlert}
-	<div in:fade={{ delay: 600 }} out:fade>
+{#if form?.error && showAlert && !loading}
+	<div in:fade={{ delay: 600 }} out:fade class="z-10">
 		<DashboardAlert content="Error: {form.error}" type="error"
 			><svg
 				xmlns="http://www.w3.org/2000/svg"
