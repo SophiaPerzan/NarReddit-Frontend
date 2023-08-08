@@ -6,7 +6,7 @@
 	export let deleteFunction: (taskID: string, index: number) => void;
 	export let index: number;
 	const videoBG = video.videoParameters.BG_VIDEO_FILENAME;
-	const excludedParams = ['MIN_POST_LENGTH', 'MAX_POST_LENGTH'];
+	const excludedParams = ['MIN_POST_LENGTH', 'MAX_POST_LENGTH', 'DESCRIPTION'];
 	interface VideoParameters {
 		BG_VIDEO_FILENAME?: string;
 		LANGUAGES?: string;
@@ -29,9 +29,9 @@
 	}
 </script>
 
-<div class="card lg:card-side bg-neutral shadow-xl mx-1/16 max-w-96 sm:w-96 lg:w-auto lg:h-96">
+<div class="card lg:card-side bg-neutral shadow-xl max-w-96 sm:w-96 lg:w-auto lg:max-w-4xl lg:h-96">
 	<figure><img class="h-full w-96 lg:w-auto" {src} alt="Video preview" /></figure>
-	<div class="card-body p-6 lg:w-min">
+	<div class="card-body p-6">
 		<h2 class="card-title">Video {video.status}</h2>
 		<ul class="mb-3">
 			{#each Object.keys(vidParams) as param}

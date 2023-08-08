@@ -3,10 +3,16 @@
 	import { enhance } from '$app/forms';
 	import { fade, slide } from 'svelte/transition';
 	import DashboardAlert from '$lib/components/dashboard-alert.svelte';
+	import { text } from '@sveltejs/kit';
 	export let form: ActionData;
 	let loading = false;
 	let showAlert = false;
 	const alertTime = 7500;
+	enum origins {
+		text = 'text',
+		scraped = 'scraped'
+	}
+	let contentOrigin: origins = origins.text;
 
 	$: if (form) {
 		loading = false;
@@ -25,39 +31,73 @@
 	action="?/create"
 	use:enhance
 	on:submit|preventDefault={onSubmit}
-	class="form-control w-full max-w-sm items-center gap-y-4 text-base-content"
+	class="form-control w-full max-w-md items-center gap-y-4 text-base-content"
 >
-	<div class="relative">
-		<span class="label label-text">Get the top post from</span>
-		<h6 class="text-xl absolute -left-5 top-11">r/</h6>
-		<input
-			type="text"
-			name="SUBREDDIT"
-			placeholder="AmITheAsshole"
-			class="input input-bordered"
-			required
-		/>
-	</div>
 	<div>
-		<span class="label label-text">Minimum character count</span>
-		<input
-			type="number"
-			name="MIN_POST_LENGTH"
-			placeholder="0"
-			class="input input-bordered"
+		<span class="label label-text">Input method</span>
+		<select
+			bind:value={contentOrigin}
+			name="CONTENT_ORIGIN"
+			class="select select-bordered"
 			required
-		/>
+		>
+			<option value={origins.text} selected>Text</option>
+			<option value={origins.scraped}>Scraped Post</option>
+		</select>
 	</div>
-	<div>
-		<span class="label label-text">Maximum character count</span>
-		<input
-			type="number"
-			name="MAX_POST_LENGTH"
-			placeholder="40,000"
-			class="input input-bordered"
-			required
-		/>
-	</div>
+	{#if contentOrigin === origins.text}
+		<div class="w-full max-w-xs">
+			<span class="label label-text">Post title</span>
+			<textarea
+				name="TITLE"
+				placeholder="AITA for not wanting to be a parent?"
+				class="textarea textarea-bordered w-full"
+				required
+			/>
+		</div>
+		<div class="w-full max-w-md">
+			<span class="label label-text">Post description</span>
+			<textarea
+				name="DESCRIPTION"
+				placeholder="AITA for not wanting to be a parent?"
+				class="textarea textarea-bordered w-full h-40"
+				required
+			/>
+		</div>
+	{:else if contentOrigin === origins.scraped}
+		<div class="relative">
+			<span class="label label-text">Get the top post from</span>
+			<h6 class="text-xl absolute -left-5 top-11">r/</h6>
+			<input
+				type="text"
+				name="SUBREDDIT"
+				placeholder="AmITheAsshole"
+				class="input input-bordered"
+				required
+			/>
+		</div>
+		<div>
+			<span class="label label-text">Minimum character count</span>
+			<input
+				type="number"
+				name="MIN_POST_LENGTH"
+				placeholder="0"
+				class="input input-bordered"
+				required
+			/>
+		</div>
+		<div>
+			<span class="label label-text">Maximum character count</span>
+			<input
+				type="number"
+				name="MAX_POST_LENGTH"
+				placeholder="40,000"
+				class="input input-bordered"
+				required
+			/>
+		</div>
+	{/if}
+
 	<div class="flex flex-col items-center">
 		<span class="label label-text">Text-To-Speech Provider</span>
 		<select name="TTS_ENGINE" class="select select-bordered" required>
@@ -67,16 +107,11 @@
 	</div>
 	<div class="flex flex-col items-center">
 		<span class="label label-text">Add video subtitles</span>
-		<input type="checkbox" name="SUBTITLES" class="toggle" checked={form?.SUBTITLES ?? false} />
+		<input type="checkbox" name="SUBTITLES" class="toggle" />
 	</div>
 	<div class="flex flex-col items-center">
 		<span class="label label-text">Randomized start time</span>
-		<input
-			type="checkbox"
-			name="RANDOM_START_TIME"
-			class="toggle"
-			checked={form?.RANDOM_START_TIME ?? false}
-		/>
+		<input type="checkbox" name="RANDOM_START_TIME" class="toggle" />
 	</div>
 	<div>
 		<span class="label label-text">Background video</span>
@@ -132,14 +167,14 @@
 	</div>
 </form>
 {#if loading}
-	<div in:fade out:fade>
+	<div in:fade out:fade={{ duration: 350 }} class="z-10">
 		<DashboardAlert content="Awaiting response from server" type="info"
 			><span class="loading loading-spinner loading-xs" /></DashboardAlert
 		>
 	</div>
 {/if}
-{#if form?.status && showAlert}
-	<div in:fade={{ delay: 600 }} out:fade>
+{#if form?.status && showAlert && !loading}
+	<div in:fade={{ delay: 600 }} out:fade class="z-10">
 		<DashboardAlert content="Video {form.status}" type="success"
 			><svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -156,8 +191,8 @@
 		>
 	</div>
 {/if}
-{#if form?.error && showAlert}
-	<div in:fade={{ delay: 600 }} out:fade>
+{#if form?.error && showAlert && !loading}
+	<div in:fade={{ delay: 600 }} out:fade class="z-10">
 		<DashboardAlert content="Error: {form.error}" type="error"
 			><svg
 				xmlns="http://www.w3.org/2000/svg"

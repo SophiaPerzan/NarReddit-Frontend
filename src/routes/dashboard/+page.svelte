@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import VideoCard from '$lib/components/video-card.svelte';
+	import { slide } from 'svelte/transition';
 	export let data: PageData;
 	async function updateVideo(taskID: string, index: number) {
 		const res = await fetch('api/status/', {
@@ -68,22 +69,24 @@
 
 <div class="flex flex-col items-center gap-4">
 	{#if data.userVideos.length > 0}
-		<div class="text-center mx-4">
+		<div class="text-center">
 			<p>Videos can take approximately 2 minutes per language to generate.</p>
 			<p>Press update status periodically to see if they're done.</p>
 		</div>
 
 		{#each data.userVideos as video, index (video.taskID)}
-			<VideoCard
-				deleteFunction={deleteVideo}
-				downloadFunction={downloadVideo}
-				updateFunction={updateVideo}
-				{video}
-				{index}
-			/>
+			<div out:slide>
+				<VideoCard
+					deleteFunction={deleteVideo}
+					downloadFunction={downloadVideo}
+					updateFunction={updateVideo}
+					{video}
+					{index}
+				/>
+			</div>
 		{/each}
 	{:else}
-		<div class="text-center mx-4">
+		<div class="text-center">
 			<p class="text-xl">You have no videos! 😥</p>
 			<p class="text-xl">Create videos in the create tab</p>
 		</div>
