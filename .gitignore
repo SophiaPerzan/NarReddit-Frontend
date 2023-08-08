@@ -9,4 +9,5 @@ node_modules
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 service-account.json
+google-service-account.json
 .vscode

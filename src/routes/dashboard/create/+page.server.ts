@@ -6,8 +6,7 @@ import { NARREDDIT_API_KEY } from '$env/static/private';
 
 import sharp from 'sharp';
 
-import vision from '@google-cloud/vision';
-const client = new vision.ImageAnnotatorClient();
+import { googleVisionClient } from '$lib/server/gcloud';
 
 type TextContentInputs = {
 	ttsEngine: string;
@@ -192,7 +191,7 @@ async function validateInputs(inputs: ContentInputs) {
 		'POLISH',
 		'HINDI'
 	];
-
+	console.log(inputs.imageFile);
 	if (inputs.imageFile !== null) {
 		if (!['image/png', 'image/jpeg'].includes(inputs.imageFile.type)) {
 			return { error: 'Invalid file type. Only PNG and JPG are allowed.' };
@@ -215,6 +214,7 @@ async function validateInputs(inputs: ContentInputs) {
 				return { error: 'Image must be safe for work.' };
 			}
 		} catch (err) {
+			console.log(err);
 			return { error: 'Could not read image.' };
 		}
 	}
@@ -313,19 +313,29 @@ async function validateInputs(inputs: ContentInputs) {
 	return null; // Return null if validation passes
 }
 
-async function safeSearchPassed(imageBuffer: Buffer) {
+async function safeSearchPassed(imageBuffer: Buffer): Promise<boolean> {
 	const request = {
 		image: { content: imageBuffer }
 	};
 
-	const [result] = await client.safeSearchDetection(request);
+	const [result] = await googleVisionClient.safeSearchDetection(request);
 	const detections = result.safeSearchAnnotation;
-	console.log(detections);
+
+	if (!detections) return false; // Handle case when detections is null or undefined
+
+	const adultCheckPassed = detections.adult === 'VERY_UNLIKELY' || detections.adult === 'UNLIKELY';
+	const violenceCheckPassed =
+		detections.violence === 'VERY_UNLIKELY' || detections.violence === 'UNLIKELY';
+	const medicalCheckPassed =
+		detections.medical === 'VERY_UNLIKELY' || detections.medical === 'UNLIKELY';
+	const spoofCheckPassed = detections.spoof === 'VERY_UNLIKELY' || detections.spoof === 'UNLIKELY';
+	const racyCheckPassed = detections.racy === 'VERY_UNLIKELY' || detections.racy === 'UNLIKELY';
+
 	return (
-		detections?.adult === 'VERY_UNLIKELY' &&
-		detections?.spoof === 'VERY_UNLIKELY' &&
-		detections?.medical === 'VERY_UNLIKELY' &&
-		detections?.violence === 'VERY_UNLIKELY' &&
-		detections?.racy === 'VERY_UNLIKELY'
+		adultCheckPassed &&
+		violenceCheckPassed &&
+		medicalCheckPassed &&
+		spoofCheckPassed &&
+		racyCheckPassed
 	);
 }
