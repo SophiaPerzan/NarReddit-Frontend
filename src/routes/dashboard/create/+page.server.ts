@@ -4,6 +4,11 @@ import type { PageServerLoad } from './$types';
 import type { Actions } from './$types';
 import { NARREDDIT_API_KEY } from '$env/static/private';
 
+import sharp from 'sharp';
+
+const vision = require('@google-cloud/vision');
+const client = new vision.ImageAnnotatorClient();
+
 type TextContentInputs = {
 	ttsEngine: string;
 	subtitles: boolean;
@@ -13,6 +18,7 @@ type TextContentInputs = {
 	contentOrigin: 'text';
 	title: string;
 	description: string;
+	imageFile: File | null;
 };
 
 type ScrapedContentInputs = {
@@ -25,6 +31,7 @@ type ScrapedContentInputs = {
 	subreddit: string;
 	minPostLength: string;
 	maxPostLength: string;
+	imageFile: File | null;
 };
 
 type ContentInputs = TextContentInputs | ScrapedContentInputs | null;
@@ -35,6 +42,7 @@ type CommonVideoParameters = {
 	RANDOM_START_TIME: boolean;
 	BG_VIDEO_FILENAME: string;
 	LANGUAGES: string;
+	IMAGE_FILE: File | null;
 };
 
 type TextVideoParameters = CommonVideoParameters & {
@@ -79,7 +87,8 @@ export const actions = {
 				LANGUAGES: languagesString,
 				CONTENT_ORIGIN: inputs!.contentOrigin,
 				TITLE: inputs!.title,
-				DESCRIPTION: inputs!.description
+				DESCRIPTION: inputs!.description,
+				IMAGE_FILE: inputs!.imageFile
 			};
 		} else if (inputs!.contentOrigin === 'scraped') {
 			videoParameters = {
@@ -91,18 +100,19 @@ export const actions = {
 				CONTENT_ORIGIN: inputs!.contentOrigin,
 				SUBREDDIT: inputs!.subreddit,
 				MIN_POST_LENGTH: inputs!.minPostLength,
-				MAX_POST_LENGTH: inputs!.maxPostLength
+				MAX_POST_LENGTH: inputs!.maxPostLength,
+				IMAGE_FILE: inputs!.imageFile
 			};
 		} else {
 			// Handle unexpected contentOrigin value
 			return { error: 'Invalid content origin. Must be either "text" or "scraped"' };
 		}
-
+		const { IMAGE_FILE, ...filteredVideoParameters } = videoParameters;
 		const videoDoc = {
 			userID: userID,
 			creationDate: FieldValue.serverTimestamp(),
 			status: 'submitted',
-			videoParameters: videoParameters
+			videoParameters: filteredVideoParameters
 		};
 		let docRef = await adminDB.collection('videos').add(videoDoc);
 		const docID = docRef.id;
@@ -136,12 +146,15 @@ export const actions = {
 
 function getFormInputs(data: FormData): ContentInputs {
 	const contentOrigin = data.get('CONTENT_ORIGIN') as string;
+
 	const commonInputs = {
 		ttsEngine: data.get('TTS_ENGINE') as string,
 		subtitles: (data.get('SUBTITLES') as string) === 'on' ? true : false,
 		randomStart: (data.get('RANDOM_START_TIME') as string) === 'on' ? true : false,
 		bgVideoFileName: data.get('BG_VIDEO_FILENAME') as string,
-		languages: data.getAll('LANGUAGES') as string[]
+		languages: data.getAll('LANGUAGES') as string[],
+		// Get the image file from the form data if it exists
+		imageFile: data.has('IMAGE_FILE') ? (data.get('IMAGE_FILE') as File) : null
 	};
 
 	if (contentOrigin === 'text') {
@@ -164,7 +177,7 @@ function getFormInputs(data: FormData): ContentInputs {
 	}
 }
 
-function validateInputs(inputs: ContentInputs) {
+async function validateInputs(inputs: ContentInputs) {
 	if (inputs === null) {
 		return { error: 'Invalid content origin. Must be either "text" or "scraped"' };
 	}
@@ -181,6 +194,32 @@ function validateInputs(inputs: ContentInputs) {
 		'POLISH',
 		'HINDI'
 	];
+
+	if (inputs.imageFile !== null) {
+		if (!['image/png', 'image/jpeg'].includes(inputs.imageFile.type)) {
+			return { error: 'Invalid file type. Only PNG and JPG are allowed.' };
+		}
+		try {
+			const arrayBuffer = await inputs.imageFile.arrayBuffer();
+			const image = sharp(arrayBuffer);
+			const metadata = await image.metadata();
+
+			if (!(metadata.width && metadata.height)) {
+				return { error: 'Could not read image dimensions.' };
+			}
+
+			if (metadata.width > 864 || metadata.height > 1536) {
+				return { error: 'Image dimensions should not exceed 864px x 1536px.' };
+			}
+			const buffer = await image.toBuffer();
+			const safeSearch = await safeSearchPassed(buffer);
+			if (!safeSearch) {
+				return { error: 'Image must be safe for work.' };
+			}
+		} catch (err) {
+			return { error: 'Could not read image.' };
+		}
+	}
 
 	if (inputs.ttsEngine === null) {
 		return {
@@ -274,4 +313,21 @@ function validateInputs(inputs: ContentInputs) {
 	}
 
 	return null; // Return null if validation passes
+}
+
+async function safeSearchPassed(imageBuffer: Buffer) {
+	const request = {
+		image: { content: imageBuffer }
+	};
+
+	const [result] = await client.safeSearchDetection(request);
+	const detections = result.safeSearchAnnotation;
+	console.log(detections);
+	return (
+		detections.adult === 'VERY_UNLIKELY' &&
+		detections.spoof === 'VERY_UNLIKELY' &&
+		detections.medical === 'VERY_UNLIKELY' &&
+		detections.violence === 'VERY_UNLIKELY' &&
+		detections.racy === 'VERY_UNLIKELY'
+	);
 }
