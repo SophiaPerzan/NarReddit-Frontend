@@ -74,7 +74,17 @@ export const actions = {
 			return validationError; // This will include the error from the content origin
 		}
 		const languagesString = inputs!.languages.join(',');
+
+		const formData = new FormData();
 		let videoParameters: VideoParameters;
+
+		formData.append('TTS_ENGINE', inputs!.ttsEngine);
+		formData.append('SUBTITLES', String(inputs!.subtitles));
+		formData.append('RANDOM_START_TIME', String(inputs!.randomStart));
+		formData.append('BG_VIDEO_FILENAME', inputs!.bgVideoFileName);
+		formData.append('LANGUAGES', languagesString);
+		formData.append('CONTENT_ORIGIN', inputs!.contentOrigin);
+		if (inputs?.imageFile) formData.append('IMAGE_FILE', inputs!.imageFile);
 
 		if (inputs!.contentOrigin === 'text') {
 			videoParameters = {
@@ -88,6 +98,9 @@ export const actions = {
 				DESCRIPTION: inputs!.description,
 				IMAGE_FILE: inputs!.imageFile
 			};
+
+			formData.append('TITLE', inputs!.title);
+			formData.append('DESCRIPTION', inputs!.description);
 		} else if (inputs!.contentOrigin === 'scraped') {
 			videoParameters = {
 				TTS_ENGINE: inputs!.ttsEngine,
@@ -101,6 +114,10 @@ export const actions = {
 				MAX_POST_LENGTH: inputs!.maxPostLength,
 				IMAGE_FILE: inputs!.imageFile
 			};
+
+			formData.append('SUBREDDIT', inputs!.subreddit);
+			formData.append('MIN_POST_LENGTH', inputs!.minPostLength);
+			formData.append('MAX_POST_LENGTH', inputs!.maxPostLength);
 		} else {
 			// Handle unexpected contentOrigin value
 			return { error: 'Invalid content origin. Must be either "text" or "scraped"' };
@@ -114,15 +131,12 @@ export const actions = {
 		};
 		let docRef = await adminDB.collection('videos').add(videoDoc);
 		const docID = docRef.id;
+		formData.append('DOC_ID', docID);
 
 		const response = await fetch('http://localhost:5000/create', {
 			method: 'POST',
-			body: JSON.stringify({
-				...videoParameters,
-				DOC_ID: docID
-			}),
+			body: formData,
 			headers: {
-				'Content-Type': 'application/json',
 				'Api-Key': NARREDDIT_API_KEY
 			}
 		});
@@ -144,6 +158,7 @@ export const actions = {
 function getFormInputs(data: FormData): ContentInputs {
 	const contentOrigin = data.get('CONTENT_ORIGIN') as string;
 
+	const imageFile = data.has('IMAGE_FILE') ? (data.get('IMAGE_FILE') as File) : null;
 	const commonInputs = {
 		ttsEngine: data.get('TTS_ENGINE') as string,
 		subtitles: (data.get('SUBTITLES') as string) === 'on' ? true : false,
@@ -151,7 +166,7 @@ function getFormInputs(data: FormData): ContentInputs {
 		bgVideoFileName: data.get('BG_VIDEO_FILENAME') as string,
 		languages: data.getAll('LANGUAGES') as string[],
 		// Get the image file from the form data if it exists
-		imageFile: data.has('IMAGE_FILE') ? (data.get('IMAGE_FILE') as File) : null
+		imageFile: imageFile && imageFile.size > 0 ? imageFile : null
 	};
 
 	if (contentOrigin === 'text') {
