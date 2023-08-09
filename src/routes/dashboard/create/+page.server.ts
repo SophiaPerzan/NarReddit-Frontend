@@ -4,6 +4,10 @@ import type { PageServerLoad } from './$types';
 import type { Actions } from './$types';
 import { NARREDDIT_API_KEY } from '$env/static/private';
 
+import sharp from 'sharp';
+
+import { googleVisionClient } from '$lib/server/gcloud';
+
 type TextContentInputs = {
 	ttsEngine: string;
 	subtitles: boolean;
@@ -13,6 +17,7 @@ type TextContentInputs = {
 	contentOrigin: 'text';
 	title: string;
 	description: string;
+	imageFile: File | null;
 };
 
 type ScrapedContentInputs = {
@@ -25,6 +30,7 @@ type ScrapedContentInputs = {
 	subreddit: string;
 	minPostLength: string;
 	maxPostLength: string;
+	imageFile: File | null;
 };
 
 type ContentInputs = TextContentInputs | ScrapedContentInputs | null;
@@ -35,6 +41,7 @@ type CommonVideoParameters = {
 	RANDOM_START_TIME: boolean;
 	BG_VIDEO_FILENAME: string;
 	LANGUAGES: string;
+	IMAGE_FILE: File | null;
 };
 
 type TextVideoParameters = CommonVideoParameters & {
@@ -61,14 +68,23 @@ export const actions = {
 		const userID = locals.userID!;
 		const data = await request.formData();
 		const inputs = getFormInputs(data);
-		const validationError = validateInputs(inputs);
+		const validationError = await validateInputs(inputs);
 
 		if (validationError) {
 			return validationError; // This will include the error from the content origin
 		}
 		const languagesString = inputs!.languages.join(',');
 
+		const formData = new FormData();
 		let videoParameters: VideoParameters;
+
+		formData.append('TTS_ENGINE', inputs!.ttsEngine);
+		formData.append('SUBTITLES', String(inputs!.subtitles));
+		formData.append('RANDOM_START_TIME', String(inputs!.randomStart));
+		formData.append('BG_VIDEO_FILENAME', inputs!.bgVideoFileName);
+		formData.append('LANGUAGES', languagesString);
+		formData.append('CONTENT_ORIGIN', inputs!.contentOrigin);
+		if (inputs?.imageFile) formData.append('IMAGE_FILE', inputs!.imageFile);
 
 		if (inputs!.contentOrigin === 'text') {
 			videoParameters = {
@@ -79,8 +95,12 @@ export const actions = {
 				LANGUAGES: languagesString,
 				CONTENT_ORIGIN: inputs!.contentOrigin,
 				TITLE: inputs!.title,
-				DESCRIPTION: inputs!.description
+				DESCRIPTION: inputs!.description,
+				IMAGE_FILE: inputs!.imageFile
 			};
+
+			formData.append('TITLE', inputs!.title);
+			formData.append('DESCRIPTION', inputs!.description);
 		} else if (inputs!.contentOrigin === 'scraped') {
 			videoParameters = {
 				TTS_ENGINE: inputs!.ttsEngine,
@@ -91,34 +111,35 @@ export const actions = {
 				CONTENT_ORIGIN: inputs!.contentOrigin,
 				SUBREDDIT: inputs!.subreddit,
 				MIN_POST_LENGTH: inputs!.minPostLength,
-				MAX_POST_LENGTH: inputs!.maxPostLength
+				MAX_POST_LENGTH: inputs!.maxPostLength,
+				IMAGE_FILE: inputs!.imageFile
 			};
+
+			formData.append('SUBREDDIT', inputs!.subreddit);
+			formData.append('MIN_POST_LENGTH', inputs!.minPostLength);
+			formData.append('MAX_POST_LENGTH', inputs!.maxPostLength);
 		} else {
 			// Handle unexpected contentOrigin value
 			return { error: 'Invalid content origin. Must be either "text" or "scraped"' };
 		}
-
+		const { IMAGE_FILE, ...filteredVideoParameters } = videoParameters;
 		const videoDoc = {
 			userID: userID,
 			creationDate: FieldValue.serverTimestamp(),
 			status: 'submitted',
-			videoParameters: videoParameters
+			videoParameters: filteredVideoParameters
 		};
 		let docRef = await adminDB.collection('videos').add(videoDoc);
 		const docID = docRef.id;
+		formData.append('DOC_ID', docID);
 
 		const response = await fetch('http://localhost:5000/create', {
 			method: 'POST',
-			body: JSON.stringify({
-				...videoParameters,
-				DOC_ID: docID
-			}),
+			body: formData,
 			headers: {
-				'Content-Type': 'application/json',
 				'Api-Key': NARREDDIT_API_KEY
 			}
 		});
-
 		const { status, task_id } = await response.json();
 
 		if (status === 'started') {
@@ -136,12 +157,16 @@ export const actions = {
 
 function getFormInputs(data: FormData): ContentInputs {
 	const contentOrigin = data.get('CONTENT_ORIGIN') as string;
+
+	const imageFile = data.has('IMAGE_FILE') ? (data.get('IMAGE_FILE') as File) : null;
 	const commonInputs = {
 		ttsEngine: data.get('TTS_ENGINE') as string,
 		subtitles: (data.get('SUBTITLES') as string) === 'on' ? true : false,
 		randomStart: (data.get('RANDOM_START_TIME') as string) === 'on' ? true : false,
 		bgVideoFileName: data.get('BG_VIDEO_FILENAME') as string,
-		languages: data.getAll('LANGUAGES') as string[]
+		languages: data.getAll('LANGUAGES') as string[],
+		// Get the image file from the form data if it exists
+		imageFile: imageFile && imageFile.size > 0 ? imageFile : null
 	};
 
 	if (contentOrigin === 'text') {
@@ -164,7 +189,7 @@ function getFormInputs(data: FormData): ContentInputs {
 	}
 }
 
-function validateInputs(inputs: ContentInputs) {
+async function validateInputs(inputs: ContentInputs) {
 	if (inputs === null) {
 		return { error: 'Invalid content origin. Must be either "text" or "scraped"' };
 	}
@@ -181,6 +206,33 @@ function validateInputs(inputs: ContentInputs) {
 		'POLISH',
 		'HINDI'
 	];
+	console.log(inputs.imageFile);
+	if (inputs.imageFile !== null) {
+		if (!['image/png', 'image/jpeg'].includes(inputs.imageFile.type)) {
+			return { error: 'Invalid file type. Only PNG and JPG are allowed.' };
+		}
+		try {
+			const arrayBuffer = await inputs.imageFile.arrayBuffer();
+			const image = sharp(arrayBuffer);
+			const metadata = await image.metadata();
+
+			if (!(metadata.width && metadata.height)) {
+				return { error: 'Could not read image dimensions.' };
+			}
+
+			if (metadata.width > 864 || metadata.height > 1536) {
+				return { error: 'Image dimensions should not exceed 864px x 1536px.' };
+			}
+			const buffer = await image.toBuffer();
+			const safeSearch = await safeSearchPassed(buffer);
+			if (!safeSearch) {
+				return { error: 'Image must be safe for work.' };
+			}
+		} catch (err) {
+			console.log(err);
+			return { error: 'Could not read image.' };
+		}
+	}
 
 	if (inputs.ttsEngine === null) {
 		return {
@@ -274,4 +326,31 @@ function validateInputs(inputs: ContentInputs) {
 	}
 
 	return null; // Return null if validation passes
+}
+
+async function safeSearchPassed(imageBuffer: Buffer): Promise<boolean> {
+	const request = {
+		image: { content: imageBuffer }
+	};
+
+	const [result] = await googleVisionClient.safeSearchDetection(request);
+	const detections = result.safeSearchAnnotation;
+
+	if (!detections) return false; // Handle case when detections is null or undefined
+
+	const adultCheckPassed = detections.adult === 'VERY_UNLIKELY' || detections.adult === 'UNLIKELY';
+	const violenceCheckPassed =
+		detections.violence === 'VERY_UNLIKELY' || detections.violence === 'UNLIKELY';
+	const medicalCheckPassed =
+		detections.medical === 'VERY_UNLIKELY' || detections.medical === 'UNLIKELY';
+	const spoofCheckPassed = detections.spoof === 'VERY_UNLIKELY' || detections.spoof === 'UNLIKELY';
+	const racyCheckPassed = detections.racy === 'VERY_UNLIKELY' || detections.racy === 'UNLIKELY';
+
+	return (
+		adultCheckPassed &&
+		violenceCheckPassed &&
+		medicalCheckPassed &&
+		spoofCheckPassed &&
+		racyCheckPassed
+	);
 }

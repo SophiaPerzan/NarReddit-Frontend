@@ -163,6 +163,10 @@
 		</label>
 	</div>
 	<div>
+		<span class="label label-text">Optional: title image upload</span>
+		<input type="file" name="IMAGE_FILE" class="file-input file-input-bordered w-full max-w-xs" />
+	</div>
+	<div>
 		<input type="submit" value="Create!" class="btn btn-outline btn-wide my-4" />
 	</div>
 </form>
@@ -175,7 +179,7 @@
 {/if}
 {#if form?.status && showAlert && !loading}
 	<div in:fade={{ delay: 600 }} out:fade class="z-10">
-		<DashboardAlert content="Video {form.status}" type="success"
+		<DashboardAlert content="Video {form.status}, check dashboard for details" type="success"
 			><svg
 				xmlns="http://www.w3.org/2000/svg"
 				class="stroke-current shrink-0 h-6 w-6"
