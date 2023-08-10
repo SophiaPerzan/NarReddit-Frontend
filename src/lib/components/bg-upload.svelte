@@ -35,6 +35,7 @@
 			{/each}
 		{:else}
 			<p class="mb-2 text-sm text-base-content font-semibold">Upload new background video</p>
+			<p class="text-xs text-base-content">Up to 1080x1920 resolution</p>
 			<p class="text-xs text-base-content">.MP4 (500MB MAX)</p>
 		{/if}
 	</div>

@@ -206,7 +206,6 @@ async function validateInputs(inputs: ContentInputs) {
 		'POLISH',
 		'HINDI'
 	];
-	console.log(inputs.imageFile);
 	if (inputs.imageFile !== null) {
 		if (!['image/png', 'image/jpeg'].includes(inputs.imageFile.type)) {
 			return { error: 'Invalid file type. Only PNG and JPG are allowed.' };

@@ -26,7 +26,7 @@
 	on:submit|preventDefault
 	class="form-control w-full max-w-md items-center gap-y-4 text-base-content"
 >
-	<BGUpload formIdentifier="dropzone" />
+	<BGUpload formIdentifier="VIDEO_FILE" />
 </form>
 {#if loading}
 	<div in:fade out:fade={{ duration: 350 }} class="z-10">
