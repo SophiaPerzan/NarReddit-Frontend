@@ -29,6 +29,7 @@
 <form
 	method="POST"
 	action="?/create"
+	enctype="multipart/form-data"
 	use:enhance
 	on:submit|preventDefault={onSubmit}
 	class="form-control w-full max-w-md items-center gap-y-4 text-base-content"
