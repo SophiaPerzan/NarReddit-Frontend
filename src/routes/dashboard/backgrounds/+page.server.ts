@@ -7,6 +7,7 @@ export const load = (async () => {
 export const actions = {
 	upload: async ({ request, locals }) => {
 		if (!locals.userID) return { error: 'unauthorized' };
+		console.log('success');
 		return { status: 'success' };
 	}
 } satisfies Actions;

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	export let formIdentifier: string;
+	let fileBinding: FileList;
 </script>
 
 <label
@@ -23,9 +24,27 @@
 				d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
 			/>
 		</svg>
-		<p class="mb-2 text-sm text-base-content font-semibold">Upload new background video</p>
-		<p class="text-xs text-base-content">.MP4 (500MB MAX)</p>
+		{#if fileBinding}
+			{#each Array.from(fileBinding) as file}
+				<p class="mb-2 text-sm text-base-content font-semibold text-center">
+					{file.name}
+				</p>
+				<p class="text-xs text-base-content text-center">
+					{(file.size / 1000000).toFixed(2)} MB
+				</p>
+			{/each}
+		{:else}
+			<p class="mb-2 text-sm text-base-content font-semibold">Upload new background video</p>
+			<p class="text-xs text-base-content">.MP4 (500MB MAX)</p>
+		{/if}
 	</div>
-	<input name={formIdentifier} type="file" class="hidden" />
+	<input
+		id={formIdentifier}
+		name={formIdentifier}
+		bind:files={fileBinding}
+		type="file"
+		class="hidden"
+		accept=".mp4"
+	/>
 </label>
-<button class="btn btn-outline btn-block">Upload</button>
+<input type="submit" value="upload" class="btn btn-outline btn-block" />

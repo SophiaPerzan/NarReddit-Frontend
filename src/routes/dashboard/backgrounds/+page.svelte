@@ -16,9 +16,6 @@
 			showAlert = false;
 		}, alertTime);
 	}
-	function onSubmit() {
-		loading = true;
-	}
 </script>
 
 <form
@@ -26,7 +23,7 @@
 	action="?/upload"
 	enctype="multipart/form-data"
 	use:enhance
-	on:submit|preventDefault={onSubmit}
+	on:submit|preventDefault
 	class="form-control w-full max-w-md items-center gap-y-4 text-base-content"
 >
 	<BGUpload formIdentifier="dropzone" />

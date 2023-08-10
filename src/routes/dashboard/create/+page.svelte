@@ -165,7 +165,12 @@
 	</div>
 	<div>
 		<span class="label label-text">Optional: title image upload</span>
-		<input type="file" name="IMAGE_FILE" class="file-input file-input-bordered w-full max-w-xs" />
+		<input
+			type="file"
+			name="IMAGE_FILE"
+			accept=".jpg, .jpeg, .png"
+			class="file-input file-input-bordered w-full max-w-xs"
+		/>
 	</div>
 	<div>
 		<input type="submit" value="Create!" class="btn btn-outline btn-wide my-4" />
