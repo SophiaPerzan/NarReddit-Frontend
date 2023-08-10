@@ -66,8 +66,9 @@
 				<Icon icon="charm:menu-hamburger" class="w-6 h-6" />
 			</button>
 			<ul class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-neutral rounded-box w-52">
+				<li><a tabindex="0" href="/dashboard">Dashboard</a></li>
 				<li><a tabindex="0" href="/dashboard/create">Create Video</a></li>
-				<li><a tabindex="0" href="/dashboard/scheduled">Scheduled Videos</a></li>
+				<li><a tabindex="0" href="/dashboard/backgrounds">Backgrounds</a></li>
 				<li><a tabindex="0" href="/dashboard/history">History</a></li>
 			</ul>
 		</div>
