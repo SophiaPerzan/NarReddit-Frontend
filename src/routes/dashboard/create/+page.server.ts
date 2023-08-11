@@ -210,6 +210,9 @@ async function validateInputs(inputs: ContentInputs) {
 		if (!['image/png', 'image/jpeg'].includes(inputs.imageFile.type)) {
 			return { error: 'Invalid file type. Only PNG and JPG are allowed.' };
 		}
+		if (inputs.imageFile.size > 1000000) {
+			return { error: 'File size too large. File must be less than 1MB.' };
+		}
 		try {
 			const arrayBuffer = await inputs.imageFile.arrayBuffer();
 			const image = sharp(arrayBuffer);

@@ -171,6 +171,7 @@
 			accept=".jpg, .jpeg, .png"
 			class="file-input file-input-bordered w-full max-w-xs"
 		/>
+		<span class="label label-text-alt">1MB max, no greater than 864 x 1536px</span>
 	</div>
 	<div>
 		<input type="submit" value="Create!" class="btn btn-outline btn-wide my-4" />

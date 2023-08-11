@@ -35,6 +35,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@google-cloud/video-intelligence": "^5.0.0",
 		"@google-cloud/vision": "^4.0.0",
 		"dotenv": "^16.3.1",
 		"firebase": "^10.1.0",
