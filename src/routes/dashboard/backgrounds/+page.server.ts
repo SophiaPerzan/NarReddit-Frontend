@@ -3,11 +3,23 @@ import { google } from '@google-cloud/video-intelligence/build/protos/protos';
 import type { PageServerLoad, Actions } from './$types';
 import { adminDB } from '$lib/server/admin';
 import { NARREDDIT_API_KEY } from '$env/static/private';
+import { FieldValue } from 'firebase-admin/firestore';
 const Feature = google.cloud.videointelligence.v1.Feature;
 const Likelihood = google.cloud.videointelligence.v1.Likelihood;
 
-export const load = (async () => {
-	return {};
+export const load = (async ({ locals }) => {
+	const userID = locals.userID;
+	const querySnapshot = await adminDB
+		.collection('background-videos')
+		.where('userID', '==', userID)
+		.orderBy('creationDate', 'desc')
+		.get();
+	const videos = querySnapshot.docs.map((doc) => {
+		const data = doc.data();
+		data.creationDate = data.creationDate.toDate(); // Convert Timestamp to Date
+		return data;
+	});
+	return { backgroundVideos: videos };
 }) satisfies PageServerLoad;
 
 export const actions = {
@@ -27,7 +39,7 @@ export const actions = {
 			}
 			const query = await adminDB
 				.collection('background-videos')
-				.where('UserID', '==', userID)
+				.where('userID', '==', userID)
 				.where('VideoName', '==', videoFile.name)
 				.limit(1)
 				.get();
@@ -44,10 +56,11 @@ export const actions = {
 				}
 			}
 			let docData = {
-				UserID: userID,
+				userID: userID,
 				VideoName: videoFile.name,
 				VideoSize: videoFile.size,
-				status: 'pending'
+				status: 'pending',
+				creationDate: FieldValue.serverTimestamp()
 			};
 			const docRef = await adminDB.collection('background-videos').add(docData);
 			const isSafe = await safeSearchPassed(videoFile);
@@ -59,7 +72,7 @@ export const actions = {
 			const body = new FormData();
 			body.append('VIDEO_FILE', videoFile);
 			body.append('USER_ID', userID!);
-			docRef.update({ status: 'uploading' });
+			await docRef.update({ status: 'uploading' });
 			const response = await fetch('http://localhost:5000/background', {
 				method: 'POST',
 				body: body,
@@ -69,10 +82,10 @@ export const actions = {
 			});
 			const { status } = await response.json();
 			if (status === 'success') {
-				docRef.update({ status: 'uploaded' });
+				await docRef.update({ status: 'uploaded' });
 				return { status: 'success' };
 			} else {
-				docRef.update({ status: 'failed' });
+				await docRef.update({ status: 'failed' });
 				return { error: 'Error uploading video' };
 			}
 		} catch (error: any) {
