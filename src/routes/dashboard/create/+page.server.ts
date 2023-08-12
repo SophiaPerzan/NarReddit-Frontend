@@ -7,6 +7,7 @@ import { NARREDDIT_API_KEY } from '$env/static/private';
 import sharp from 'sharp';
 
 import { googleVisionClient } from '$lib/server/gcloud';
+import { fetchBackgroundVideos } from '$lib/server/DBQueries';
 
 type TextContentInputs = {
 	ttsEngine: string;
@@ -59,8 +60,10 @@ type ScrapedVideoParameters = CommonVideoParameters & {
 
 type VideoParameters = TextVideoParameters | ScrapedVideoParameters;
 
-export const load = (async () => {
-	return {};
+export const load = (async ({ locals }) => {
+	const userID = locals.userID!;
+	const backgroundVideos = fetchBackgroundVideos(userID);
+	return { backgroundVideos };
 }) satisfies PageServerLoad;
 
 export const actions = {
@@ -68,7 +71,15 @@ export const actions = {
 		const userID = locals.userID!;
 		const data = await request.formData();
 		const inputs = getFormInputs(data);
-		const validationError = await validateInputs(inputs);
+		const bgVideos = await fetchBackgroundVideos(userID);
+		let bgVideoFilenames = ['MCParkour.mp4', 'SubwaySurfers.mp4', 'RANDOM'];
+		let userBGVideo = false;
+		if (bgVideos.length > 0) {
+			bgVideoFilenames = bgVideos.map((video) => video.VideoName);
+			bgVideoFilenames.push('RANDOM');
+			userBGVideo = true;
+		}
+		const validationError = await validateInputs(inputs, bgVideoFilenames);
 
 		if (validationError) {
 			return validationError; // This will include the error from the content origin
@@ -85,6 +96,7 @@ export const actions = {
 		formData.append('LANGUAGES', languagesString);
 		formData.append('CONTENT_ORIGIN', inputs!.contentOrigin);
 		if (inputs?.imageFile) formData.append('IMAGE_FILE', inputs!.imageFile);
+		if (userBGVideo) formData.append('USER_ID', userID);
 
 		if (inputs!.contentOrigin === 'text') {
 			videoParameters = {
@@ -189,13 +201,12 @@ function getFormInputs(data: FormData): ContentInputs {
 	}
 }
 
-async function validateInputs(inputs: ContentInputs) {
+async function validateInputs(inputs: ContentInputs, allowedBGVideoFileNames: string[]) {
 	if (inputs === null) {
 		return { error: 'Invalid content origin. Must be either "text" or "scraped"' };
 	}
 
 	const allowedTTSEngines = ['GOOGLE', 'ELEVENLABS'];
-	const allowedBGVideoFileNames = ['MCParkour.mp4', 'SubwaySurfers.mp4', 'RANDOM'];
 	const allowedLanguages = [
 		'ENGLISH',
 		'SPANISH',
@@ -206,10 +217,12 @@ async function validateInputs(inputs: ContentInputs) {
 		'POLISH',
 		'HINDI'
 	];
-	console.log(inputs.imageFile);
 	if (inputs.imageFile !== null) {
 		if (!['image/png', 'image/jpeg'].includes(inputs.imageFile.type)) {
 			return { error: 'Invalid file type. Only PNG and JPG are allowed.' };
+		}
+		if (inputs.imageFile.size > 1000000) {
+			return { error: 'File size too large. File must be less than 1MB.' };
 		}
 		try {
 			const arrayBuffer = await inputs.imageFile.arrayBuffer();

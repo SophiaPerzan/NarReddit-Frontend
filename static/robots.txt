@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /dashboard
+Sitemap: http://www.narreddit.com/sitemap.xml

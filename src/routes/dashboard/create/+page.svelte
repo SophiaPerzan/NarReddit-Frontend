@@ -4,6 +4,7 @@
 	import { fade, slide } from 'svelte/transition';
 	import DashboardAlert from '$lib/components/dashboard-alert.svelte';
 	import { text } from '@sveltejs/kit';
+	export let data: PageData;
 	export let form: ActionData;
 	let loading = false;
 	let showAlert = false;
@@ -29,6 +30,7 @@
 <form
 	method="POST"
 	action="?/create"
+	enctype="multipart/form-data"
 	use:enhance
 	on:submit|preventDefault={onSubmit}
 	class="form-control w-full max-w-md items-center gap-y-4 text-base-content"
@@ -117,8 +119,13 @@
 		<span class="label label-text">Background video</span>
 		<select name="BG_VIDEO_FILENAME" class="select select-bordered" required>
 			<option value="RANDOM" selected>Random</option>
-			<option value="MCParkour.mp4">Minecraft Parkour</option>
-			<option value="SubwaySurfers.mp4">Subway Surfers</option>
+			{#if data.backgroundVideos.length === 0}
+				<option value="MCParkour.mp4">Minecraft Parkour</option>
+				<option value="SubwaySurfers.mp4">Subway Surfers</option>
+			{/if}
+			{#each data.backgroundVideos as video}
+				<option value={video.VideoName}>{video.VideoName.replace('.mp4', '')}</option>
+			{/each}
 		</select>
 	</div>
 	<div>
@@ -164,7 +171,13 @@
 	</div>
 	<div>
 		<span class="label label-text">Optional: title image upload</span>
-		<input type="file" name="IMAGE_FILE" class="file-input file-input-bordered w-full max-w-xs" />
+		<input
+			type="file"
+			name="IMAGE_FILE"
+			accept=".jpg, .jpeg, .png"
+			class="file-input file-input-bordered w-full max-w-xs"
+		/>
+		<span class="label label-text-alt">1MB max, no greater than 864 x 1536px</span>
 	</div>
 	<div>
 		<input type="submit" value="Create!" class="btn btn-outline btn-wide my-4" />
@@ -179,7 +192,7 @@
 {/if}
 {#if form?.status && showAlert && !loading}
 	<div in:fade={{ delay: 600 }} out:fade class="z-10">
-		<DashboardAlert content="Video {form.status}, check dashboard for details" type="success"
+		<DashboardAlert content="Video {form.status}, check history for details" type="success"
 			><svg
 				xmlns="http://www.w3.org/2000/svg"
 				class="stroke-current shrink-0 h-6 w-6"

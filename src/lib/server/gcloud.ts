@@ -5,6 +5,7 @@ import {
 	GOOGLE_PRIVATE_KEY
 } from '$env/static/private';
 import vision from '@google-cloud/vision';
+import video from '@google-cloud/video-intelligence';
 const options = {
 	projectId: GOOGLE_PROJECT_ID,
 	credentials: {
@@ -20,4 +21,4 @@ const credentials = {
 	projectId: GOOGLE_PROJECT_ID
 };
 export const googleVisionClient = new vision.ImageAnnotatorClient({ credentials });
-await googleVisionClient.initialize();
+export const googleVideoClient = new video.VideoIntelligenceServiceClient({ credentials });
