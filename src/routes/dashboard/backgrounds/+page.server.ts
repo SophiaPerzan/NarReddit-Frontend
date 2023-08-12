@@ -17,6 +17,7 @@ export const load = (async ({ locals }) => {
 	const videos = querySnapshot.docs.map((doc) => {
 		const data = doc.data();
 		data.creationDate = data.creationDate.toDate(); // Convert Timestamp to Date
+		data.ID = doc.id;
 		return data;
 	});
 	return { backgroundVideos: videos };

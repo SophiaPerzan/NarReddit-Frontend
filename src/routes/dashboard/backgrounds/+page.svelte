@@ -4,6 +4,7 @@
 	import { enhance } from '$app/forms';
 	import { fade, slide } from 'svelte/transition';
 	import BGUpload from '$lib/components/bg-upload.svelte';
+	import BgVideoCard from '$lib/components/bg-video-card.svelte';
 	export let data: PageData;
 	export let form: ActionData;
 	let loading = false;
@@ -19,6 +20,29 @@
 	function onSubmit() {
 		loading = true;
 	}
+	async function updateBGVideo(ID: string, index: number) {
+		const res = await fetch('/api/backgrounds/', {
+			method: 'GET',
+			body: JSON.stringify({
+				ID: ID
+			})
+		});
+		const resData = await res.json();
+		data.backgroundVideos[index].status = resData.status;
+	}
+	async function deleteBGVideo(ID: string, index: number) {
+		const res = await fetch('/api/backgrounds/', {
+			method: 'DELETE',
+			body: JSON.stringify({
+				ID: ID
+			})
+		});
+		const resData = await res.json();
+		if (resData.status === 'success') {
+			data.backgroundVideos.splice(index, 1);
+			data.backgroundVideos = data.backgroundVideos;
+		}
+	}
 </script>
 
 <p>Video uploads can take up to 5 or more minutes to verify</p>
@@ -33,6 +57,13 @@
 >
 	<BGUpload formIdentifier="VIDEO_FILE" />
 </form>
+{#if data.backgroundVideos.length > 0}
+	{#each data.backgroundVideos as video, index (video.ID)}
+		<div in:slide out:slide>
+			<BgVideoCard updateFunction={updateBGVideo} deleteFunction={deleteBGVideo} {video} {index} />
+		</div>
+	{/each}
+{/if}
 {#if loading}
 	<div in:fade out:fade={{ duration: 350 }} class="z-10">
 		<DashboardAlert content="Awaiting response from server" type="info"
