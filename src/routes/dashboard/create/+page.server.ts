@@ -76,6 +76,7 @@ export const actions = {
 		let userBGVideo = false;
 		if (bgVideos.length > 0) {
 			bgVideoFilenames = bgVideos.map((video) => video.VideoName);
+			bgVideoFilenames.push('RANDOM');
 			userBGVideo = true;
 		}
 		const validationError = await validateInputs(inputs, bgVideoFilenames);
