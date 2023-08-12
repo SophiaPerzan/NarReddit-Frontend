@@ -4,7 +4,7 @@
 	import { slide } from 'svelte/transition';
 	export let data: PageData;
 	async function updateVideo(taskID: string, index: number) {
-		const res = await fetch('api/status/', {
+		const res = await fetch('/api/status/', {
 			method: 'POST',
 			body: JSON.stringify({
 				taskID: taskID
@@ -14,7 +14,7 @@
 		data.userVideos[index].status = resData.status;
 	}
 	async function deleteVideo(taskID: string, index: number) {
-		const res = await fetch('api/delete/', {
+		const res = await fetch('/api/delete/', {
 			method: 'POST',
 			body: JSON.stringify({
 				taskID: taskID
@@ -27,7 +27,7 @@
 		}
 	}
 	async function downloadVideo(taskID: string) {
-		const res = await fetch('api/download/', {
+		const res = await fetch('/api/download/', {
 			method: 'POST',
 			body: JSON.stringify({
 				taskID: taskID
