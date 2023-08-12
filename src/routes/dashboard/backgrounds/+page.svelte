@@ -22,7 +22,7 @@
 	}
 	async function updateBGVideo(ID: string, index: number) {
 		const res = await fetch('/api/backgrounds/', {
-			method: 'GET',
+			method: 'POST',
 			body: JSON.stringify({
 				ID: ID
 			})
