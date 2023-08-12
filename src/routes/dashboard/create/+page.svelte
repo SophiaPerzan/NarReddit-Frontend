@@ -119,8 +119,10 @@
 		<span class="label label-text">Background video</span>
 		<select name="BG_VIDEO_FILENAME" class="select select-bordered" required>
 			<option value="RANDOM" selected>Random</option>
-			<option value="MCParkour.mp4">Minecraft Parkour</option>
-			<option value="SubwaySurfers.mp4">Subway Surfers</option>
+			{#if data.backgroundVideos.length === 0}
+				<option value="MCParkour.mp4">Minecraft Parkour</option>
+				<option value="SubwaySurfers.mp4">Subway Surfers</option>
+			{/if}
 			{#each data.backgroundVideos as video}
 				<option value={video.VideoName}>{video.VideoName.replace('.mp4', '')}</option>
 			{/each}

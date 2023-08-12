@@ -71,7 +71,14 @@ export const actions = {
 		const userID = locals.userID!;
 		const data = await request.formData();
 		const inputs = getFormInputs(data);
-		const validationError = await validateInputs(inputs);
+		const bgVideos = await fetchBackgroundVideos(userID);
+		let bgVideoFilenames = ['MCParkour.mp4', 'SubwaySurfers.mp4', 'RANDOM'];
+		let userBGVideo = false;
+		if (bgVideos.length > 0) {
+			bgVideoFilenames = bgVideos.map((video) => video.VideoName);
+			userBGVideo = true;
+		}
+		const validationError = await validateInputs(inputs, bgVideoFilenames);
 
 		if (validationError) {
 			return validationError; // This will include the error from the content origin
@@ -88,6 +95,7 @@ export const actions = {
 		formData.append('LANGUAGES', languagesString);
 		formData.append('CONTENT_ORIGIN', inputs!.contentOrigin);
 		if (inputs?.imageFile) formData.append('IMAGE_FILE', inputs!.imageFile);
+		if (userBGVideo) formData.append('USER_ID', userID);
 
 		if (inputs!.contentOrigin === 'text') {
 			videoParameters = {
@@ -192,13 +200,12 @@ function getFormInputs(data: FormData): ContentInputs {
 	}
 }
 
-async function validateInputs(inputs: ContentInputs) {
+async function validateInputs(inputs: ContentInputs, allowedBGVideoFileNames: string[]) {
 	if (inputs === null) {
 		return { error: 'Invalid content origin. Must be either "text" or "scraped"' };
 	}
 
 	const allowedTTSEngines = ['GOOGLE', 'ELEVENLABS'];
-	const allowedBGVideoFileNames = ['MCParkour.mp4', 'SubwaySurfers.mp4', 'RANDOM'];
 	const allowedLanguages = [
 		'ENGLISH',
 		'SPANISH',

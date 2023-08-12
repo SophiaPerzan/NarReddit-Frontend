@@ -7,6 +7,7 @@ import { DocumentReference, FieldValue } from 'firebase-admin/firestore';
 import { fetchBackgroundVideos } from '$lib/server/DBQueries';
 const Feature = google.cloud.videointelligence.v1.Feature;
 const Likelihood = google.cloud.videointelligence.v1.Likelihood;
+const validFilenamePattern = /^[a-zA-Z0-9-_]+\.mp4$/;
 
 export const load = (async ({ locals }) => {
 	const userID = locals.userID!;
@@ -28,6 +29,12 @@ export const actions = {
 			}
 			if (videoFile.size > 500000000) {
 				return { error: 'File size too large. File must be less than 500MB' };
+			}
+			// Check if the filename is well-formed
+			if (!validFilenamePattern.test(videoFile.name)) {
+				return {
+					error: 'Filename must contain only alphanumeric characters, dashes, and underscores.'
+				};
 			}
 			const query = await adminDB
 				.collection('background-videos')
