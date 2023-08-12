@@ -3,7 +3,7 @@ import { google } from '@google-cloud/video-intelligence/build/protos/protos';
 import type { PageServerLoad, Actions } from './$types';
 import { adminDB } from '$lib/server/admin';
 import { NARREDDIT_API_KEY } from '$env/static/private';
-import { FieldValue } from 'firebase-admin/firestore';
+import { DocumentReference, FieldValue } from 'firebase-admin/firestore';
 const Feature = google.cloud.videointelligence.v1.Feature;
 const Likelihood = google.cloud.videointelligence.v1.Likelihood;
 
@@ -64,36 +64,52 @@ export const actions = {
 				creationDate: FieldValue.serverTimestamp()
 			};
 			const docRef = await adminDB.collection('background-videos').add(docData);
-			const isSafe = await safeSearchPassed(videoFile);
-			if (isSafe.error) {
-				return { error: isSafe.error };
-			} else if (!isSafe.passed) {
-				return { error: 'Video possibly contains explicit content' };
-			}
-			const body = new FormData();
-			body.append('VIDEO_FILE', videoFile);
-			body.append('USER_ID', userID!);
-			await docRef.update({ status: 'uploading' });
-			const response = await fetch('http://localhost:5000/background', {
-				method: 'POST',
-				body: body,
-				headers: {
-					'Api-Key': NARREDDIT_API_KEY
-				}
-			});
-			const { status } = await response.json();
-			if (status === 'success') {
-				await docRef.update({ status: 'uploaded' });
-				return { status: 'success' };
-			} else {
-				await docRef.update({ status: 'failed' });
-				return { error: 'Error uploading video' };
-			}
+
+			// Start background processing without awaiting
+			processInBackground(videoFile, userID!, docRef);
+			// Return a pending status to the client
+			return { status: 'pending' };
 		} catch (error: any) {
 			return { error: error.message };
 		}
 	}
 } satisfies Actions;
+
+async function processInBackground(videoFile: File, userID: string, docRef: DocumentReference) {
+	try {
+		const isSafe = await safeSearchPassed(videoFile);
+		if (isSafe.error || !isSafe.passed) {
+			await docRef.update({ status: 'failed' });
+			if (isSafe.error) {
+				console.error(isSafe.error);
+			}
+			return;
+		}
+		const body = new FormData();
+		body.append('VIDEO_FILE', videoFile);
+		body.append('USER_ID', userID!);
+		await docRef.update({ status: 'uploading' });
+		const response = await fetch('http://localhost:5000/background', {
+			method: 'POST',
+			body: body,
+			headers: {
+				'Api-Key': NARREDDIT_API_KEY
+			}
+		});
+		const { status } = await response.json();
+		if (status === 'success') {
+			await docRef.update({ status: 'uploaded' });
+			return { status: 'success' };
+		} else {
+			await docRef.update({ status: 'failed' });
+			return { error: 'Error uploading video' };
+		}
+	} catch (error) {
+		// Handle any errors that occur during background processing
+		await docRef.update({ status: 'failed' });
+		console.error(error);
+	}
+}
 
 async function safeSearchPassed(video: File) {
 	// Define chunk size (1 MB)
