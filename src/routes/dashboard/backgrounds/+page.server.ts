@@ -1,10 +1,11 @@
 import { googleVideoClient } from '$lib/server/gcloud';
-import { google } from '@google-cloud/video-intelligence/build/protos/protos';
 import type { PageServerLoad, Actions } from './$types';
 import { adminDB } from '$lib/server/admin';
 import { NARREDDIT_API_KEY } from '$env/static/private';
 import { DocumentReference, FieldValue } from 'firebase-admin/firestore';
 import { fetchBackgroundVideos } from '$lib/server/DBQueries';
+import pkg from '@google-cloud/video-intelligence/build/protos/protos.js';
+const { google } = pkg;
 const Feature = google.cloud.videointelligence.v1.Feature;
 const Likelihood = google.cloud.videointelligence.v1.Likelihood;
 const validFilenamePattern = /^[a-zA-Z0-9-_]+\.mp4$/;
