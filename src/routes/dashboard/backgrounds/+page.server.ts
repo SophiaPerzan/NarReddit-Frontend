@@ -4,22 +4,13 @@ import type { PageServerLoad, Actions } from './$types';
 import { adminDB } from '$lib/server/admin';
 import { NARREDDIT_API_KEY } from '$env/static/private';
 import { DocumentReference, FieldValue } from 'firebase-admin/firestore';
+import { fetchBackgroundVideos } from '$lib/server/DBQueries';
 const Feature = google.cloud.videointelligence.v1.Feature;
 const Likelihood = google.cloud.videointelligence.v1.Likelihood;
 
 export const load = (async ({ locals }) => {
 	const userID = locals.userID;
-	const querySnapshot = await adminDB
-		.collection('background-videos')
-		.where('userID', '==', userID)
-		.orderBy('creationDate', 'desc')
-		.get();
-	const videos = querySnapshot.docs.map((doc) => {
-		const data = doc.data();
-		data.creationDate = data.creationDate.toDate(); // Convert Timestamp to Date
-		data.ID = doc.id;
-		return data;
-	});
+	const videos = await fetchBackgroundVideos(userID!);
 	return { backgroundVideos: videos };
 }) satisfies PageServerLoad;
 
