@@ -9,8 +9,8 @@ const Feature = google.cloud.videointelligence.v1.Feature;
 const Likelihood = google.cloud.videointelligence.v1.Likelihood;
 
 export const load = (async ({ locals }) => {
-	const userID = locals.userID;
-	const videos = await fetchBackgroundVideos(userID!);
+	const userID = locals.userID!;
+	const videos = await fetchBackgroundVideos(userID);
 	return { backgroundVideos: videos };
 }) satisfies PageServerLoad;
 

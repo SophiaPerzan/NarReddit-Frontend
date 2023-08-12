@@ -7,6 +7,7 @@ import { NARREDDIT_API_KEY } from '$env/static/private';
 import sharp from 'sharp';
 
 import { googleVisionClient } from '$lib/server/gcloud';
+import { fetchBackgroundVideos } from '$lib/server/DBQueries';
 
 type TextContentInputs = {
 	ttsEngine: string;
@@ -59,8 +60,10 @@ type ScrapedVideoParameters = CommonVideoParameters & {
 
 type VideoParameters = TextVideoParameters | ScrapedVideoParameters;
 
-export const load = (async () => {
-	return {};
+export const load = (async ({ locals }) => {
+	const userID = locals.userID!;
+	const backgroundVideos = fetchBackgroundVideos(userID);
+	return { backgroundVideos };
 }) satisfies PageServerLoad;
 
 export const actions = {

@@ -4,6 +4,7 @@
 	import { fade, slide } from 'svelte/transition';
 	import DashboardAlert from '$lib/components/dashboard-alert.svelte';
 	import { text } from '@sveltejs/kit';
+	export let data: PageData;
 	export let form: ActionData;
 	let loading = false;
 	let showAlert = false;
@@ -120,6 +121,9 @@
 			<option value="RANDOM" selected>Random</option>
 			<option value="MCParkour.mp4">Minecraft Parkour</option>
 			<option value="SubwaySurfers.mp4">Subway Surfers</option>
+			{#each data.backgroundVideos as video}
+				<option value={video.VideoName}>{video.VideoName.replace('.mp4', '')}</option>
+			{/each}
 		</select>
 	</div>
 	<div>
