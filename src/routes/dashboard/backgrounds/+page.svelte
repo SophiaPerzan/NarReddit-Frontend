@@ -16,14 +16,19 @@
 			showAlert = false;
 		}, alertTime);
 	}
+	function onSubmit() {
+		loading = true;
+	}
 </script>
 
+<p>Video uploads can take up to 5 or more minutes to verify</p>
+<p>Please be patient 🙏</p>
 <form
 	method="POST"
 	action="?/upload"
 	enctype="multipart/form-data"
 	use:enhance
-	on:submit|preventDefault
+	on:submit={onSubmit}
 	class="form-control w-full max-w-md items-center gap-y-4 text-base-content"
 >
 	<BGUpload formIdentifier="VIDEO_FILE" />

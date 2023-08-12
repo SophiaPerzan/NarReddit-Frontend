@@ -1,6 +1,8 @@
 import { googleVideoClient } from '$lib/server/gcloud';
 import { google } from '@google-cloud/video-intelligence/build/protos/protos';
 import type { PageServerLoad, Actions } from './$types';
+import { adminDB } from '$lib/server/admin';
+import { NARREDDIT_API_KEY } from '$env/static/private';
 const Feature = google.cloud.videointelligence.v1.Feature;
 const Likelihood = google.cloud.videointelligence.v1.Likelihood;
 
@@ -10,25 +12,72 @@ export const load = (async () => {
 
 export const actions = {
 	upload: async ({ request, locals }) => {
-		const userID = locals.userID;
-		const data = await request.formData();
-		const videoFile = data.has('VIDEO_FILE') ? (data.get('VIDEO_FILE') as File) : null;
-		if (!videoFile) {
-			return { error: 'No file uploaded' };
+		try {
+			const userID = locals.userID;
+			const data = await request.formData();
+			const videoFile = data.has('VIDEO_FILE') ? (data.get('VIDEO_FILE') as File) : null;
+			if (!videoFile) {
+				return { error: 'No file uploaded' };
+			}
+			if (!(videoFile.type === 'video/mp4')) {
+				return { error: 'Invalid file extension. File must be .mp4' };
+			}
+			if (videoFile.size > 500000000) {
+				return { error: 'File size too large. File must be less than 500MB' };
+			}
+			const query = await adminDB
+				.collection('background-videos')
+				.where('UserID', '==', userID)
+				.where('VideoName', '==', videoFile.name)
+				.limit(1)
+				.get();
+			if (query.empty === false) {
+				const doc = query.docs[0];
+				const vidDocData = doc.data();
+				//If the video is in the pending, uploading, or uploaded state, we can't overwrite it
+				if (vidDocData.status === 'pending' || vidDocData.status === 'uploading') {
+					return { error: 'A background video with this filename is already being uploaded' };
+				} else if (vidDocData.status === 'uploaded') {
+					return { error: 'A background video with this filename already exists' };
+				} else if (vidDocData.status === 'failed') {
+					//If the video is in the failed state, we can just overwrite it
+				}
+			}
+			let docData = {
+				UserID: userID,
+				VideoName: videoFile.name,
+				VideoSize: videoFile.size,
+				status: 'pending'
+			};
+			const docRef = await adminDB.collection('background-videos').add(docData);
+			const isSafe = await safeSearchPassed(videoFile);
+			if (isSafe.error) {
+				return { error: isSafe.error };
+			} else if (!isSafe.passed) {
+				return { error: 'Video possibly contains explicit content' };
+			}
+			const body = new FormData();
+			body.append('VIDEO_FILE', videoFile);
+			body.append('USER_ID', userID!);
+			docRef.update({ status: 'uploading' });
+			const response = await fetch('http://localhost:5000/background', {
+				method: 'POST',
+				body: body,
+				headers: {
+					'Api-Key': NARREDDIT_API_KEY
+				}
+			});
+			const { status } = await response.json();
+			if (status === 'success') {
+				docRef.update({ status: 'uploaded' });
+				return { status: 'success' };
+			} else {
+				docRef.update({ status: 'failed' });
+				return { error: 'Error uploading video' };
+			}
+		} catch (error: any) {
+			return { error: error.message };
 		}
-		if (!(videoFile.type === 'video/mp4')) {
-			return { error: 'Invalid file extension. File must be .mp4' };
-		}
-		if (videoFile.size > 500000000) {
-			return { error: 'File size too large. File must be less than 500MB' };
-		}
-		const isSafe = await safeSearchPassed(videoFile);
-		if (isSafe.error) {
-			return { error: isSafe.error };
-		} else if (!isSafe.passed) {
-			return { error: 'Video possibly contains explicit content' };
-		}
-		return { status: 'success' };
 	}
 } satisfies Actions;
 
