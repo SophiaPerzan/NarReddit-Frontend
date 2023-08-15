@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import Icon from '@iconify/svelte';
-	import { signOut } from 'firebase/auth';
-	import { auth } from '$lib/firebase';
 	import { goto } from '$app/navigation';
 
 	onMount(() => {
@@ -21,8 +19,7 @@
 
 	async function signOutUser() {
 		try {
-			const res = await fetch('/signin', { method: 'DELETE' });
-			await signOut(auth);
+			const res = await fetch('/signout', { method: 'POST' });
 			goto('/');
 		} catch (error: any) {
 			const errorCode = error.code;

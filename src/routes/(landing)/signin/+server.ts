@@ -1,5 +1,5 @@
 import { adminAuth, adminDB } from '$lib/server/admin';
-import { error, json } from '@sveltejs/kit';
+import { error, json, redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
@@ -26,9 +26,4 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 	} else {
 		throw error(401, 'Recent sign in required!');
 	}
-};
-
-export const DELETE: RequestHandler = async ({ cookies }) => {
-	cookies.delete('__session', { path: '/' });
-	return json({ status: 'signedOut' });
 };
