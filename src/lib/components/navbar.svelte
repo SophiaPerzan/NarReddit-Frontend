@@ -17,17 +17,6 @@
 		};
 	});
 
-	async function signOutUser() {
-		try {
-			const res = await fetch('/signout', { method: 'POST' });
-			goto('/');
-		} catch (error: any) {
-			const errorCode = error.code;
-			const errorMessage = error.message;
-			console.log(errorCode, errorMessage);
-			alert(errorMessage);
-		}
-	}
 	let profileElement: HTMLElement;
 	let menuElement: HTMLElement;
 	let mouseDownElement: HTMLElement;
@@ -83,7 +72,11 @@
 			<ul class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-neutral rounded-box w-52">
 				<li><a tabindex="0" href="/dashboard/profile">Profile</a></li>
 				<li><a tabindex="0" href="/dashboard/settings">Settings</a></li>
-				<li><button on:click={signOutUser}>Logout</button></li>
+				<li>
+					<form action="/signout" method="POST">
+						<input type="submit" value="Logout" class="hover:cursor-pointer" />
+					</form>
+				</li>
 			</ul>
 		</div>
 	</div>
