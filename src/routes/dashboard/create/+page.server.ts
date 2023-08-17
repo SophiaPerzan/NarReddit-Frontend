@@ -356,14 +356,7 @@ async function safeSearchPassed(imageBuffer: Buffer): Promise<boolean> {
 		detections.violence === 'VERY_UNLIKELY' || detections.violence === 'UNLIKELY';
 	const medicalCheckPassed =
 		detections.medical === 'VERY_UNLIKELY' || detections.medical === 'UNLIKELY';
-	const spoofCheckPassed = detections.spoof === 'VERY_UNLIKELY' || detections.spoof === 'UNLIKELY';
 	const racyCheckPassed = detections.racy === 'VERY_UNLIKELY' || detections.racy === 'UNLIKELY';
 
-	return (
-		adultCheckPassed &&
-		violenceCheckPassed &&
-		medicalCheckPassed &&
-		spoofCheckPassed &&
-		racyCheckPassed
-	);
+	return adultCheckPassed && violenceCheckPassed && medicalCheckPassed && racyCheckPassed;
 }
