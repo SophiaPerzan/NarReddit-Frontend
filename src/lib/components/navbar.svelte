@@ -73,8 +73,8 @@
 				<li><a tabindex="0" href="/dashboard/profile">Profile</a></li>
 				<li><a tabindex="0" href="/dashboard/settings">Settings</a></li>
 				<li>
-					<form action="/signout" method="POST">
-						<input type="submit" value="Logout" class="hover:cursor-pointer" />
+					<form action="/signout" method="POST" class="block">
+						<button type="submit" class="w-full text-left"> Logout </button>
 					</form>
 				</li>
 			</ul>
