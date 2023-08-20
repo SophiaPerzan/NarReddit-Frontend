@@ -22,10 +22,17 @@
 					><Icon class="text-2xl" icon="material-symbols:delete-outline" /></button
 				>
 			{:else}
-				<button
-					on:click={() => updateFunction(video.ID, index)}
-					class="btn btn-outline btn-secondary">Update Status</button
-				>
+				<div class="justify-between flex w-full mt-1">
+					<button
+						on:click={() => updateFunction(video.ID, index)}
+						class="btn btn-outline btn-secondary">Update Status</button
+					>
+					<button
+						on:click={() => deleteFunction(video.ID, index)}
+						class="btn btn-outline btn-warning px-3"
+						><Icon class="text-2xl" icon="material-symbols:delete-outline" /></button
+					>
+				</div>
 			{/if}
 		</div>
 	</div>
