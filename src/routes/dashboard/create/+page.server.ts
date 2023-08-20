@@ -62,7 +62,8 @@ type VideoParameters = TextVideoParameters | ScrapedVideoParameters;
 
 export const load = (async ({ locals }) => {
 	const userID = locals.userID!;
-	const backgroundVideos = fetchBackgroundVideos(userID);
+	let backgroundVideos = await fetchBackgroundVideos(userID);
+	backgroundVideos = backgroundVideos.filter((video) => video.status === 'uploaded');
 	return { backgroundVideos };
 }) satisfies PageServerLoad;
 
