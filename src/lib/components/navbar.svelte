@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import Icon from '@iconify/svelte';
-	import { signOut } from 'firebase/auth';
-	import { auth } from '$lib/firebase';
 	import { goto } from '$app/navigation';
 
 	onMount(() => {
@@ -19,18 +17,6 @@
 		};
 	});
 
-	async function signOutUser() {
-		try {
-			const res = await fetch('/signin', { method: 'DELETE' });
-			await signOut(auth);
-			goto('/');
-		} catch (error: any) {
-			const errorCode = error.code;
-			const errorMessage = error.message;
-			console.log(errorCode, errorMessage);
-			alert(errorMessage);
-		}
-	}
 	let profileElement: HTMLElement;
 	let menuElement: HTMLElement;
 	let mouseDownElement: HTMLElement;
@@ -86,7 +72,11 @@
 			<ul class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-neutral rounded-box w-52">
 				<li><a tabindex="0" href="/dashboard/profile">Profile</a></li>
 				<li><a tabindex="0" href="/dashboard/settings">Settings</a></li>
-				<li><button on:click={signOutUser}>Logout</button></li>
+				<li>
+					<form action="/signout" method="POST" class="block">
+						<button type="submit" class="w-full text-left"> Logout </button>
+					</form>
+				</li>
 			</ul>
 		</div>
 	</div>

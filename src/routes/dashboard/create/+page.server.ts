@@ -62,7 +62,8 @@ type VideoParameters = TextVideoParameters | ScrapedVideoParameters;
 
 export const load = (async ({ locals }) => {
 	const userID = locals.userID!;
-	const backgroundVideos = fetchBackgroundVideos(userID);
+	let backgroundVideos = await fetchBackgroundVideos(userID);
+	backgroundVideos = backgroundVideos.filter((video) => video.status === 'uploaded');
 	return { backgroundVideos };
 }) satisfies PageServerLoad;
 
@@ -356,14 +357,7 @@ async function safeSearchPassed(imageBuffer: Buffer): Promise<boolean> {
 		detections.violence === 'VERY_UNLIKELY' || detections.violence === 'UNLIKELY';
 	const medicalCheckPassed =
 		detections.medical === 'VERY_UNLIKELY' || detections.medical === 'UNLIKELY';
-	const spoofCheckPassed = detections.spoof === 'VERY_UNLIKELY' || detections.spoof === 'UNLIKELY';
 	const racyCheckPassed = detections.racy === 'VERY_UNLIKELY' || detections.racy === 'UNLIKELY';
 
-	return (
-		adultCheckPassed &&
-		violenceCheckPassed &&
-		medicalCheckPassed &&
-		spoofCheckPassed &&
-		racyCheckPassed
-	);
+	return adultCheckPassed && violenceCheckPassed && medicalCheckPassed && racyCheckPassed;
 }

@@ -3,4 +3,4 @@
 	import SignIn from '$lib/components/signin.svelte';
 </script>
 
-<SignIn class="opacity-90" />
+<SignIn class="opacity-75" />

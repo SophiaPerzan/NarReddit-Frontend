@@ -71,6 +71,7 @@
 	<div class="text-center">
 		<p>Videos can take approximately 2 minutes per language to generate.</p>
 		<p>Press update status periodically to see if they're done.</p>
+		<p>There is no progress bar for downloads, just click it once and wait for it to finish</p>
 	</div>
 
 	{#each data.userVideos as video, index (video.taskID)}

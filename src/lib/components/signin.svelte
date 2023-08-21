@@ -81,9 +81,10 @@
 </script>
 
 <div
-	class="join join-vertical w-max bg-primary text-primary-content text-center {$$props.class || ''}"
+	class="join join-vertical w-max bg-base-100 text-neutral-content text-center {$$props.class ||
+		''}"
 >
-	<div class="collapse join-item border border-base-300">
+	<div class="collapse join-item border border-base-content border-opacity-30">
 		<input type="radio" name="my-accordion-4" checked={true} />
 		<div class="collapse-title text-2xl font-semibold">Sign Up</div>
 		<div class="collapse-content">
@@ -112,14 +113,14 @@
 						class:border-error={pass2Err}
 						class="input input-bordered w-full max-w-xs text-base-content border-2"
 					/>
-					<input type="submit" value="Register" class="btn btn-accent" />
-					<Lineword title="or" />
-					<button on:click={signInWithGoogle} class="btn btn-accent">Continue with Google</button>
+					<input type="submit" value="Register" class="btn btn-primary" />
+					<Lineword title="or" hrclass="border-base-content border-opacity-50" />
+					<button on:click={signInWithGoogle} class="btn btn-primary">Continue with Google</button>
 				</div>
 			</form>
 		</div>
 	</div>
-	<div class="collapse join-item border border-base-300">
+	<div class="collapse join-item border border-base-content border-opacity-30">
 		<input type="radio" name="my-accordion-4" />
 		<div class="collapse-title text-2xl font-semibold">Sign In</div>
 		<div class="collapse-content">
@@ -139,9 +140,9 @@
 						bind:value={password}
 						class="input input-bordered w-full max-w-xs text-base-content border-2"
 					/>
-					<input type="submit" value="Login" class="btn btn-accent" />
-					<Lineword title="or" />
-					<button on:click={signInWithGoogle} class="btn btn-accent">Continue with Google</button>
+					<input type="submit" value="Login" class="btn btn-primary" />
+					<Lineword title="or" hrclass="border-base-content border-opacity-50" />
+					<button on:click={signInWithGoogle} class="btn btn-primary">Continue with Google</button>
 				</div>
 			</form>
 		</div>
