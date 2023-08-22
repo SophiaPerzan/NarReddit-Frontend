@@ -122,6 +122,7 @@
 			{#if data.backgroundVideos.length === 0}
 				<option value="MCParkour.mp4">Minecraft Parkour</option>
 				<option value="SubwaySurfers.mp4">Subway Surfers</option>
+				<option value="Mirrors-Edge.mp4">Mirror's Edge</option>
 			{/if}
 			{#each data.backgroundVideos as video}
 				<option value={video.VideoName}>{video.VideoName.replace('.mp4', '')}</option>
