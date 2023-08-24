@@ -98,7 +98,7 @@
 			/>
 		</div>
 		<div>
-			<label class="label justify-start gap-x-2">
+			<label class="label justify-start gap-x-2 w-fit hover:cursor-pointer">
 				<span class="label-text">Base64 Image string</span>
 				<!-- Open the modal using ID.showModal() method -->
 				<button on:click={() => base64Modal.showModal()}
