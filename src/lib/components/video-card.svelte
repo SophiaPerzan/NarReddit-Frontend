@@ -35,7 +35,7 @@
 	<figure><img class="h-full w-96 lg:w-auto" {src} alt="Video preview" /></figure>
 	<div class="card-body p-6">
 		<h2 class="card-title">Video {video.status}</h2>
-		<ul class="mb-3">
+		<ul class="mb-3 max-w-md">
 			{#each Object.keys(vidParams) as param}
 				{#if param === 'LANGUAGES'}
 					<li>
