@@ -11,7 +11,7 @@ export const handle = (async ({ event, resolve }) => {
 	}
 
 	if (event.url.pathname.startsWith('/dashboard') && !event.locals.userID) {
-		throw redirect(303, '/login');
+		throw redirect(303, '/signin');
 	}
 
 	// Check the content-length to determine the size of the request body
