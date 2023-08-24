@@ -56,6 +56,7 @@
 				<li><a tabindex="0" href="/dashboard/create">Create Video</a></li>
 				<li><a tabindex="0" href="/dashboard/backgrounds">Backgrounds</a></li>
 				<li><a tabindex="0" href="/dashboard/history">History</a></li>
+				<li><a tabindex="0" href="/dashboard/image">Intro Card</a></li>
 			</ul>
 		</div>
 	</div>
