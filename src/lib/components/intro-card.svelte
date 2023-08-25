@@ -29,7 +29,7 @@
 					{name}
 				</p>
 				{#if verified}
-					<div class="inline" class:relative={!preview} class:-bottom-0.5={!preview}>
+					<div class="inline relative" class:bottom-0.5={preview} class:-bottom-0.5={!preview}>
 						<Icon icon="material-symbols:verified" class="inline text-xl text-blue-500" />
 					</div>
 				{/if}
@@ -39,7 +39,7 @@
 				class:relative={!preview}
 				class:-top-[5px]={!preview}
 			>
-				<div class="inline" class:relative={!preview} class:-bottom-1={!preview}>
+				<div class="inline relative" class:bottom-px={preview} class:-bottom-1={!preview}>
 					<Icon icon="ic:baseline-remove-red-eye" class="inline text-xl text-slate-600" />
 				</div>
 				<p class="inline" class:relative={!preview} class:-top-0.5={!preview}>{views}</p>
