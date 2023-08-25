@@ -4,6 +4,7 @@
 	import html2canvas from 'html2canvas';
 	import { tick } from 'svelte';
 	let canvas: HTMLDivElement;
+	const maxCanvasWidth = 864;
 	async function captureElement(element: HTMLElement) {
 		if (!element) return alert('Nothing to capture');
 
@@ -11,8 +12,22 @@
 		// Wait for Svelte to apply updates
 		await tick();
 		html2canvas(element, { backgroundColor: null }).then((canvas) => {
-			const img = canvas.toDataURL('image/png');
-			downloadImage(img); // This function is provided below
+			if (canvas.width > maxCanvasWidth) {
+				const scaleFactor = maxCanvasWidth / canvas.width;
+				const newCanvas = document.createElement('canvas');
+				const newContext = newCanvas.getContext('2d');
+
+				newCanvas.width = maxCanvasWidth;
+				newCanvas.height = canvas.height * scaleFactor;
+
+				newContext?.drawImage(canvas, 0, 0, maxCanvasWidth, newCanvas.height);
+
+				const img = newCanvas.toDataURL('image/png');
+				downloadImage(img); // This function is provided below
+			} else {
+				const img = canvas.toDataURL('image/png');
+				downloadImage(img); // This function is provided below
+			}
 		});
 		preview = true;
 	}

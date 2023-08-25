@@ -13,10 +13,12 @@
 </script>
 
 <div
-	class="bg-slate-50 shadow-xl flex flex-col rounded-xl px-4 py-2 min-[570px]:p-6 min-[570px]:pb-4 text-slate-800"
+	class="bg-white shadow-xl flex flex-col rounded-xl px-4 py-2 min-[570px]:p-6 min-[570px]:pb-4 text-slate-800"
 >
 	<div class="flex gap-x-3">
-		<img src={'data:image/png;base64,' + src} class="rounded-full h-8 min-[570px]:h-11" />
+		{#if src}
+			<img src={'data:image/png;base64,' + src} class="rounded-full h-8 min-[570px]:h-11" />
+		{/if}
 		<div class="flex justify-between gap-x-4 w-full items-center">
 			<h6 class:relative={!preview} class:-top-1={!preview}>
 				<p
