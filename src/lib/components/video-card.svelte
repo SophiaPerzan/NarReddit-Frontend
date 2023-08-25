@@ -24,6 +24,8 @@
 		src = '/minecraft.webp';
 	} else if (videoBG === 'SubwaySurfers.mp4') {
 		src = '/subwaysurfers.webp';
+	} else if (videoBG === 'Mirrors-Edge.mp4') {
+		src = '/mirrorsedge.webp';
 	} else {
 		src = '/random.webp';
 	}
