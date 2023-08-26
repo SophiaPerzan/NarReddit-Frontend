@@ -31,11 +31,13 @@
 	}
 </script>
 
-<div class="card lg:card-side bg-neutral shadow-xl max-w-96 sm:w-96 lg:w-auto lg:h-96">
-	<figure><img class="h-full w-96 lg:w-auto" {src} alt="Video preview" /></figure>
+<div class="card lg:card-side bg-neutral shadow-xl max-w-96 sm:w-96 lg:max-w-none lg:w-auto">
+	<figure>
+		<img class="h-full w-96 lg:w-[400px]" {src} alt="Video preview" />
+	</figure>
 	<div class="card-body p-6">
 		<h2 class="card-title">Video {video.status}</h2>
-		<ul class="mb-3 max-w-md">
+		<ul class="mb-3 max-w-lg">
 			{#each Object.keys(vidParams) as param}
 				{#if param === 'LANGUAGES'}
 					<li>
@@ -47,7 +49,7 @@
 				{:else if param === 'BG_VIDEO_FILENAME'}
 					<li>Background video: {vidParams[param]?.replace('.mp4', '')}</li>
 				{:else}
-					<li class="lg:max-w-xl">{param}: {vidParams[param]}</li>
+					<li class="lg:max-w-lg">{param}: {vidParams[param]}</li>
 				{/if}
 			{/each}
 		</ul>
