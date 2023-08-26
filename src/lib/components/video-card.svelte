@@ -31,7 +31,7 @@
 	}
 </script>
 
-<div class="card lg:card-side bg-neutral shadow-xl max-w-96 sm:w-96 lg:w-auto lg:max-w-4xl lg:h-96">
+<div class="card lg:card-side bg-neutral shadow-xl max-w-96 sm:w-96 lg:w-auto lg:h-96">
 	<figure><img class="h-full w-96 lg:w-auto" {src} alt="Video preview" /></figure>
 	<div class="card-body p-6">
 		<h2 class="card-title">Video {video.status}</h2>
@@ -47,7 +47,7 @@
 				{:else if param === 'BG_VIDEO_FILENAME'}
 					<li>Background video: {vidParams[param]?.replace('.mp4', '')}</li>
 				{:else}
-					<li>{param}: {vidParams[param]}</li>
+					<li class="lg:max-w-xl">{param}: {vidParams[param]}</li>
 				{/if}
 			{/each}
 		</ul>

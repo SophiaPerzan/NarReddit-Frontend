@@ -73,7 +73,7 @@ export const actions = {
 		const data = await request.formData();
 		const inputs = getFormInputs(data);
 		const bgVideos = await fetchBackgroundVideos(userID);
-		let bgVideoFilenames = ['MCParkour.mp4', 'SubwaySurfers.mp4', 'RANDOM'];
+		let bgVideoFilenames = ['MCParkour.mp4', 'SubwaySurfers.mp4', 'Mirrors-Edge.mp4', 'RANDOM'];
 		let userBGVideo = false;
 		if (bgVideos.length > 0) {
 			bgVideoFilenames = bgVideos.map((video) => video.VideoName);
