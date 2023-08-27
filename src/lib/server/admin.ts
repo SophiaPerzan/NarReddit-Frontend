@@ -26,3 +26,4 @@ try {
 export const adminDB = getFirestore();
 export const adminAuth = getAuth();
 export const adminStorage = getStorage();
+export const adminStorageBucket = getStorage().bucket('narreddit-nr.appspot.com');
