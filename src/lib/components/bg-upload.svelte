@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	export let formIdentifier: string;
-	let fileBinding: FileList;
+	export let fileBinding: FileList;
 </script>
 
 <label
@@ -48,4 +48,3 @@
 		accept=".mp4"
 	/>
 </label>
-<input type="submit" value="upload" class="btn btn-outline btn-block" />
