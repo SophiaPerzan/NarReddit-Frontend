@@ -1,6 +1,7 @@
 import { adminAuth, adminDB } from '$lib/server/admin';
 import { error, json, redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { FieldValue } from 'firebase-admin/firestore';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	const { idToken } = await request.json();
@@ -19,7 +20,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		if (!doc.exists) {
 			await docRef.set({
 				userID: decodedIdToken.uid,
-				email: decodedIdToken.email
+				email: decodedIdToken.email,
+				creationDate: FieldValue.serverTimestamp()
 			});
 		}
 		return json({ status: 'signedIn', success: true });

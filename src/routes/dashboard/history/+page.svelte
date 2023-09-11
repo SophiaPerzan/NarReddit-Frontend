@@ -37,11 +37,14 @@
 			throw new Error('Fetch failed');
 		}
 
+		const json = await res.json();
+		const downloadLink = json.downloadLink;
+
 		// Create a Blob from the response
-		const blob = await res.blob();
+		//const blob = await res.blob();
 
 		// Create a new URL object from the Blob
-		const url = URL.createObjectURL(blob);
+		const url = downloadLink;
 
 		// Create a link element
 		const a = document.createElement('a');
@@ -50,11 +53,11 @@
 		a.href = url;
 
 		// Use the Content-Disposition header to get the original file name
-		const contentDisposition = res.headers.get('Content-Disposition');
-		if (contentDisposition) {
-			const fileName = contentDisposition.split('=')[1];
-			a.download = fileName;
-		}
+		//const contentDisposition = res.headers.get('Content-Disposition');
+		//if (contentDisposition) {
+		//	const fileName = contentDisposition.split('=')[1];
+		//	a.download = fileName;
+		//}
 
 		// Append the link to the body
 		document.body.appendChild(a);
