@@ -25,6 +25,10 @@
 	function onSubmit() {
 		loading = true;
 	}
+	let charCount = 0;
+	let textInput = '';
+	$: charCount = textInput.length;
+	const charMax = 5000;
 </script>
 
 <form
@@ -33,7 +37,7 @@
 	enctype="multipart/form-data"
 	use:enhance
 	on:submit|preventDefault={onSubmit}
-	class="form-control w-full max-w-md items-center gap-y-4 text-base-content"
+	class="form-control w-full max-w-3xl items-center gap-y-4 text-base-content"
 >
 	<div>
 		<span class="label label-text">Input method</span>
@@ -48,23 +52,33 @@
 		</select>
 	</div>
 	{#if contentOrigin === origins.text}
-		<div class="w-full max-w-xs">
+		<div class="w-full max-w-sm">
 			<span class="label label-text">Post title</span>
 			<textarea
 				name="TITLE"
 				placeholder="AITA for not wanting to be a parent?"
-				class="textarea textarea-bordered w-full"
+				class="textarea textarea-bordered w-full h-24"
 				required
 			/>
 		</div>
-		<div class="w-full max-w-md">
+		<div class="w-full max-w-xl">
 			<span class="label label-text">Post description</span>
 			<textarea
 				name="DESCRIPTION"
 				placeholder="AITA for not wanting to be a parent?"
-				class="textarea textarea-bordered w-full h-40"
+				class="textarea textarea-bordered w-full h-52"
+				class:textarea-error={charCount >= charMax}
+				class:border-2={charCount >= charMax}
 				required
+				maxlength={charMax}
+				bind:value={textInput}
 			/>
+			<label for="DESCRIPTION" class="label">
+				<span class="label-text-alt" />
+				<span class="label-text-alt" class:text-error={charCount >= charMax}
+					>{charCount} / {charMax}</span
+				>
+			</label>
 		</div>
 	{:else if contentOrigin === origins.scraped}
 		<div class="relative">
@@ -86,6 +100,8 @@
 				placeholder="0"
 				class="input input-bordered"
 				required
+				max="5000"
+				min="0"
 			/>
 		</div>
 		<div>
@@ -93,9 +109,11 @@
 			<input
 				type="number"
 				name="MAX_POST_LENGTH"
-				placeholder="40,000"
+				placeholder="5,000"
 				class="input input-bordered"
 				required
+				max="5000"
+				min="0"
 			/>
 		</div>
 	{/if}
@@ -112,7 +130,7 @@
 		<input type="checkbox" name="SUBTITLES" class="toggle" />
 	</div>
 	<div class="flex flex-col items-center">
-		<span class="label label-text">Randomized start time</span>
+		<span class="label label-text">Randomize background video starting point</span>
 		<input type="checkbox" name="RANDOM_START_TIME" class="toggle" />
 	</div>
 	<div>
