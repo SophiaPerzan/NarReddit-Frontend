@@ -107,7 +107,7 @@
 	let uploadProgress = 0;
 </script>
 
-<p>Video uploads can take up to 5 or more minutes to verify</p>
+<p>Video uploads can take 5 to 10 minutes or more to verify</p>
 <p>Please be patient 🙏</p>
 <div class="form-control w-full max-w-md items-center gap-y-4 text-base-content">
 	<BGUpload formIdentifier="VIDEO_FILE" bind:fileBinding={fileList} />
