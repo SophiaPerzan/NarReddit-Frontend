@@ -3,6 +3,7 @@
 	import { enhance } from '$app/forms';
 	import { fade, slide } from 'svelte/transition';
 	import DashboardAlert from '$lib/components/dashboard-alert.svelte';
+	import MaterialSymbolsInfo from '~icons/material-symbols/info';
 	import { text } from '@sveltejs/kit';
 	export let data: PageData;
 	export let form: ActionData;
@@ -14,6 +15,12 @@
 		scraped = 'scraped'
 	}
 	let contentOrigin: origins = origins.text;
+
+	enum ttsEngines {
+		google = 'GOOGLE',
+		elevenlabs = 'ELEVENLABS'
+	}
+	let ttsEngine: ttsEngines = ttsEngines.google;
 
 	$: if (form) {
 		loading = false;
@@ -52,79 +59,103 @@
 		</select>
 	</div>
 	{#if contentOrigin === origins.text}
-		<div class="w-full max-w-sm">
-			<span class="label label-text">Post title</span>
-			<textarea
-				name="TITLE"
-				placeholder="AITA for not wanting to be a parent?"
-				class="textarea textarea-bordered w-full h-24"
-				required
-			/>
-		</div>
-		<div class="w-full max-w-xl">
-			<span class="label label-text">Post description</span>
-			<textarea
-				name="DESCRIPTION"
-				placeholder="AITA for not wanting to be a parent?"
-				class="textarea textarea-bordered w-full h-52"
-				class:textarea-error={charCount >= charMax}
-				class:border-2={charCount >= charMax}
-				required
-				maxlength={charMax}
-				bind:value={textInput}
-			/>
-			<label for="DESCRIPTION" class="label">
-				<span class="label-text-alt" />
-				<span class="label-text-alt" class:text-error={charCount >= charMax}
-					>{charCount} / {charMax}</span
-				>
-			</label>
+		<div
+			in:slide={{ delay: 525 }}
+			out:slide
+			class="flex flex-col justify-center w-full max-w-3xl items-center gap-y-4"
+		>
+			<div class="w-full max-w-sm">
+				<span class="label label-text">Post title</span>
+				<textarea
+					name="TITLE"
+					placeholder="AITA for not wanting to be a parent?"
+					class="textarea textarea-bordered w-full h-24"
+					required
+				/>
+			</div>
+			<div class="w-full max-w-xl">
+				<span class="label label-text">Post description</span>
+				<textarea
+					name="DESCRIPTION"
+					placeholder="AITA for not wanting to be a parent?"
+					class="textarea textarea-bordered w-full h-52"
+					class:textarea-error={charCount >= charMax}
+					class:border-2={charCount >= charMax}
+					required
+					maxlength={charMax}
+					bind:value={textInput}
+				/>
+				<label for="DESCRIPTION" class="label">
+					<span class="label-text-alt" />
+					<span class="label-text-alt" class:text-error={charCount >= charMax}
+						>{charCount} / {charMax}</span
+					>
+				</label>
+			</div>
 		</div>
 	{:else if contentOrigin === origins.scraped}
-		<div class="relative">
-			<span class="label label-text">Get the top post from</span>
-			<h6 class="text-xl absolute -left-5 top-11">r/</h6>
-			<input
-				type="text"
-				name="SUBREDDIT"
-				placeholder="AmITheAsshole"
-				class="input input-bordered"
-				required
-			/>
-		</div>
-		<div>
-			<span class="label label-text">Minimum character count</span>
-			<input
-				type="number"
-				name="MIN_POST_LENGTH"
-				placeholder="0"
-				class="input input-bordered"
-				required
-				max="5000"
-				min="0"
-			/>
-		</div>
-		<div>
-			<span class="label label-text">Maximum character count</span>
-			<input
-				type="number"
-				name="MAX_POST_LENGTH"
-				placeholder="5,000"
-				class="input input-bordered"
-				required
-				max="5000"
-				min="0"
-			/>
+		<div
+			in:slide={{ delay: 525 }}
+			out:slide
+			class="flex flex-col justify-center w-full max-w-3xl items-center gap-y-4"
+		>
+			<div class="relative">
+				<span class="label label-text">Get the top post from</span>
+				<h6 class="text-xl absolute -left-5 top-11">r/</h6>
+				<input
+					type="text"
+					name="SUBREDDIT"
+					placeholder="AmITheAsshole"
+					class="input input-bordered"
+					required
+				/>
+			</div>
+			<div>
+				<span class="label label-text">Minimum character count</span>
+				<input
+					type="number"
+					name="MIN_POST_LENGTH"
+					placeholder="0"
+					class="input input-bordered"
+					required
+					max="5000"
+					min="0"
+				/>
+			</div>
+			<div>
+				<span class="label label-text">Maximum character count</span>
+				<input
+					type="number"
+					name="MAX_POST_LENGTH"
+					placeholder="5,000"
+					class="input input-bordered"
+					required
+					max="5000"
+					min="0"
+				/>
+			</div>
 		</div>
 	{/if}
 
 	<div class="flex flex-col items-center">
 		<span class="label label-text">Text-To-Speech Provider</span>
-		<select name="TTS_ENGINE" class="select select-bordered" required>
+		<select bind:value={ttsEngine} name="TTS_ENGINE" class="select select-bordered" required>
 			<option value="GOOGLE" selected>GoogleTTS Standard</option>
-			<option disabled value="ELEVENLABS">ElevenLabs: disabled</option>
+			<option value="ELEVENLABS">ElevenLabs</option>
 		</select>
 	</div>
+	{#if ttsEngine === ttsEngines.elevenlabs}
+		<div in:slide out:slide class="flex flex-col items-center">
+			<a
+				href="https://docs.elevenlabs.io/api-reference/quick-start/authentication"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="label label-text gap-x-1 relative"
+				>ElevenLabs API Key<MaterialSymbolsInfo class="inline relative top-px" /></a
+			>
+			<input required type="text" name="ELEVENLABS_API_KEY" class="input input-bordered" />
+		</div>
+	{/if}
 	<div class="flex flex-col items-center">
 		<span class="label label-text">Add video subtitles</span>
 		<input type="checkbox" name="SUBTITLES" class="toggle" />
