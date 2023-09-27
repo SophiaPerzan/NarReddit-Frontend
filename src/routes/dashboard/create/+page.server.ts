@@ -19,6 +19,7 @@ type TextContentInputs = {
 	title: string;
 	description: string;
 	imageFile: File | null;
+	elevenlabsAPIKey: string | null;
 };
 
 type ScrapedContentInputs = {
@@ -32,6 +33,7 @@ type ScrapedContentInputs = {
 	minPostLength: string;
 	maxPostLength: string;
 	imageFile: File | null;
+	elevenlabsAPIKey: string | null;
 };
 
 type ContentInputs = TextContentInputs | ScrapedContentInputs | null;
@@ -87,6 +89,7 @@ export const actions = {
 		}
 		const languagesString = inputs!.languages.join(',');
 
+		//The form data we send to the video creation pipeline
 		const formData = new FormData();
 		let videoParameters: VideoParameters;
 
@@ -96,6 +99,8 @@ export const actions = {
 		formData.append('BG_VIDEO_FILENAME', inputs!.bgVideoFileName);
 		formData.append('LANGUAGES', languagesString);
 		formData.append('CONTENT_ORIGIN', inputs!.contentOrigin);
+		if (inputs!.elevenlabsAPIKey) formData.append('ELEVENLABS_API_KEY', inputs!.elevenlabsAPIKey);
+
 		if (inputs?.imageFile) formData.append('IMAGE_FILE', inputs!.imageFile);
 		if (userBGVideo) formData.append('USER_ID', userID);
 
@@ -135,6 +140,8 @@ export const actions = {
 			// Handle unexpected contentOrigin value
 			return { error: 'Invalid content origin. Must be either "text" or "scraped"' };
 		}
+
+		// get videoParams minus Image file
 		const { IMAGE_FILE, ...filteredVideoParameters } = videoParameters;
 		const videoDoc = {
 			userID: userID,
@@ -172,14 +179,18 @@ function getFormInputs(data: FormData): ContentInputs {
 	const contentOrigin = data.get('CONTENT_ORIGIN') as string;
 
 	const imageFile = data.has('IMAGE_FILE') ? (data.get('IMAGE_FILE') as File) : null;
-	const commonInputs = {
+	let commonInputs = {
 		ttsEngine: data.get('TTS_ENGINE') as string,
 		subtitles: (data.get('SUBTITLES') as string) === 'on' ? true : false,
 		randomStart: (data.get('RANDOM_START_TIME') as string) === 'on' ? true : false,
 		bgVideoFileName: data.get('BG_VIDEO_FILENAME') as string,
 		languages: data.getAll('LANGUAGES') as string[],
 		// Get the image file from the form data if it exists
-		imageFile: imageFile && imageFile.size > 0 ? imageFile : null
+		imageFile: imageFile && imageFile.size > 0 ? imageFile : null,
+		elevenlabsAPIKey:
+			(data.get('TTS_ENGINE') as string) === 'ELEVENLABS'
+				? (data.get('ELEVENLABS_API_KEY') as string)
+				: null
 	};
 
 	if (contentOrigin === 'text') {
@@ -256,6 +267,14 @@ async function validateInputs(inputs: ContentInputs, allowedBGVideoFileNames: st
 	if (!allowedTTSEngines.includes(inputs.ttsEngine)) {
 		return {
 			error: 'Must enter a valid TTS engine'
+		};
+	}
+	if (
+		inputs.ttsEngine === 'ELEVENLABS' &&
+		(inputs.elevenlabsAPIKey === '' || !inputs.elevenlabsAPIKey)
+	) {
+		return {
+			error: 'Must enter an API Key if using ElevenLabs'
 		};
 	}
 	if (inputs.bgVideoFileName === null) {
