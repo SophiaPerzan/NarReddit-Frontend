@@ -181,7 +181,8 @@ function getFormInputs(data: FormData): ContentInputs {
 	const imageFile = data.has('IMAGE_FILE') ? (data.get('IMAGE_FILE') as File) : null;
 	let commonInputs = {
 		ttsEngine: data.get('TTS_ENGINE') as string,
-		subtitles: (data.get('SUBTITLES') as string) === 'on' ? true : false,
+		//set subtitles to always true as I removed the option to disable them on the create page
+		subtitles: true,
 		randomStart: (data.get('RANDOM_START_TIME') as string) === 'on' ? true : false,
 		bgVideoFileName: data.get('BG_VIDEO_FILENAME') as string,
 		languages: data.getAll('LANGUAGES') as string[],

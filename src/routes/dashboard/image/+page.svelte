@@ -173,8 +173,14 @@
 		>
 	</div>
 	<div class="flex flex-col w-full items-center lg:items-start">
-		<div class="w-fit" bind:this={canvas}>
+		<div class="w-fit" bind:this={canvas} class:x2={!preview}>
 			<IntroCard {title} {name} {views} {upvotes} {comments} {src} {preview} {heart} {verified} />
 		</div>
 	</div>
 </div>
+
+<style>
+	.x2 {
+		transform: scale(2, 2);
+	}
+</style>

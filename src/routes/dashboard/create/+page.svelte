@@ -154,12 +154,9 @@
 				>ElevenLabs API Key<MaterialSymbolsInfo class="inline relative top-px" /></a
 			>
 			<input required type="text" name="ELEVENLABS_API_KEY" class="input input-bordered" />
+			<span class="label label-text text-warning">ElevenLabs account must be on a paid tier</span>
 		</div>
 	{/if}
-	<div class="flex flex-col items-center">
-		<span class="label label-text">Add video subtitles</span>
-		<input type="checkbox" name="SUBTITLES" class="toggle" />
-	</div>
 	<div class="flex flex-col items-center">
 		<span class="label label-text">Randomize background video starting point</span>
 		<input type="checkbox" name="RANDOM_START_TIME" class="toggle" />
