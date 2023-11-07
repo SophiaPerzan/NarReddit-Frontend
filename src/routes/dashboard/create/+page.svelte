@@ -158,6 +158,10 @@
 		</div>
 	{/if}
 	<div class="flex flex-col items-center">
+		<span class="label label-text">Add video subtitles</span>
+		<input type="checkbox" name="SUBTITLES" class="toggle" />
+	</div>
+	<div class="flex flex-col items-center">
 		<span class="label label-text">Randomize background video starting point</span>
 		<input type="checkbox" name="RANDOM_START_TIME" class="toggle" />
 	</div>
