@@ -38,10 +38,12 @@
 	async function uploadVideo() {
 		if (!(fileList && fileList.length > 0)) {
 			alert('Please select a file to upload');
+			return;
 		}
 		const file = fileList[0];
 		if (file.size > 500000000) {
 			alert('File size is too large. Please select a file under 500MB');
+			return;
 		}
 		if (file.type !== 'video/mp4') {
 			alert('Please select a .mp4 file to upload');
@@ -91,7 +93,7 @@
 				});
 				const resData = await res.json();
 				loading = false;
-				if (resData?.status !== '') {
+				if (resData?.status === 'pending') {
 					location.reload();
 				} else {
 					errorAlert = resData.error;
