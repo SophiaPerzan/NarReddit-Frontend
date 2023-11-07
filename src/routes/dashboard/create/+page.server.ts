@@ -256,7 +256,11 @@ function getFormInputs(data: FormData): ContentInputs | null {
 		randomStart: (data.get('RANDOM_START_TIME') as string) === 'on',
 		bgVideoFileName: data.get('BG_VIDEO_FILENAME') as string,
 		languages: data.getAll('LANGUAGES') as string[],
-		imageFile: data.has('IMAGE_FILE') ? (data.get('IMAGE_FILE') as File) : null
+		imageFile: data.has('IMAGE_FILE')
+			? (data.get('IMAGE_FILE') as File).size > 0
+				? (data.get('IMAGE_FILE') as File)
+				: null
+			: null
 	};
 
 	let TTSInputs: TTSEngineInputs | null = getTTSInputs(data);
@@ -288,6 +292,7 @@ async function validateInputs(inputs: ContentInputs | null, allowedBGVideoFileNa
 
 	if (inputs.imageFile !== null) {
 		if (!['image/png', 'image/jpeg'].includes(inputs.imageFile.type)) {
+			console.log(inputs);
 			return { error: 'Invalid file type. Only PNG and JPG are allowed.' };
 		}
 		if (inputs.imageFile.size > 1000000) {
