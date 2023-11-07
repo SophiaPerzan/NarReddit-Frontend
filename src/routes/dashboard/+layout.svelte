@@ -6,10 +6,16 @@
 	import Signin from '$lib/components/signin.svelte';
 </script>
 
-<div class="flex flex-col min-h-screen">
+<div class="flex flex-col min-h-dynamic-screen">
 	<Navbar />
 	<main class="flex-grow flex flex-col items-center gap-4 mx-1/16">
 		<slot />
 	</main>
 	<Footer />
 </div>
+
+<style>
+	.min-h-dynamic-screen {
+		min-height: 100dvh;
+	}
+</style>
