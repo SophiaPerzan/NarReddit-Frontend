@@ -154,6 +154,11 @@
 				>ElevenLabs API Key<MaterialSymbolsInfo class="inline relative top-px" /></a
 			>
 			<input required type="text" name="ELEVENLABS_API_KEY" class="input input-bordered" />
+			<span class="label label-text text-warning pt-1 mb-4"
+				>ElevenLabs account must be on a paid tier</span
+			>
+			<span class="label label-text">Optional: Voice name (eg. Adam)</span>
+			<input type="text" name="ELEVENLABS_VOICE" class="input input-bordered" />
 		</div>
 	{/if}
 	<div class="flex flex-col items-center">

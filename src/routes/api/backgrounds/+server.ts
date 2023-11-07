@@ -120,7 +120,10 @@ export const DELETE: RequestHandler = async ({ request, locals }) => {
 			}
 		});
 		const gcpFile = adminStorageBucket.file(userID + '/backgrounds/' + fileName);
-		await gcpFile.delete({ ignoreNotFound: true });
+		//take [0] as that is the result of the promise (if the file exists)
+		if ((await gcpFile.exists())[0] === true) {
+			await gcpFile.delete();
+		}
 		await docRef.delete();
 		return json({ status: 'success' });
 	}
@@ -138,7 +141,10 @@ async function processInBackground(
 		const videoFile = new Blob([videoBuffer], { type: 'video/mp4' });
 		const isSafe = await safeSearchPassed(videoFile);
 		if (isSafe.error || !isSafe.passed) {
+			console.log('Video failed safe search');
 			if (await docExists(docRef)) await docRef.update({ status: 'failed' });
+			const gcpFile = adminStorageBucket.file(userID + '/backgrounds/' + fileName);
+			await gcpFile.delete();
 
 			if (isSafe.error) {
 				console.error(isSafe.error);
@@ -229,11 +235,10 @@ async function safeSearchPassed(video: Blob) {
 	const explicitContentResults = operationResult.annotationResults[0].explicitAnnotation?.frames;
 	for (const frame of explicitContentResults || []) {
 		if (
-			!(
-				frame.pornographyLikelihood === Likelihood.VERY_UNLIKELY ||
-				frame.pornographyLikelihood === Likelihood.UNLIKELY
-			)
+			frame.pornographyLikelihood === Likelihood.VERY_LIKELY ||
+			frame.pornographyLikelihood === Likelihood.LIKELY
 		) {
+			console.log(frame);
 			return { passed: false };
 		}
 	}

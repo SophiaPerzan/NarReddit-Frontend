@@ -86,7 +86,7 @@
 >
 	<div class="collapse join-item border border-base-content border-opacity-30">
 		<input type="radio" name="my-accordion-4" checked={true} />
-		<div class="collapse-title text-2xl font-semibold">Sign Up</div>
+		<div class="collapse-title text-2xl font-semibold p-4">Sign Up</div>
 		<div class="collapse-content">
 			<form on:submit|preventDefault={signupWithEmail}>
 				<div class="form-control w-full max-w-xs space-y-3">
@@ -122,7 +122,7 @@
 	</div>
 	<div class="collapse join-item border border-base-content border-opacity-30">
 		<input type="radio" name="my-accordion-4" />
-		<div class="collapse-title text-2xl font-semibold">Sign In</div>
+		<div class="collapse-title text-2xl font-semibold p-4">Sign In</div>
 		<div class="collapse-content">
 			<form on:submit|preventDefault={signinWithEmail}>
 				<div class="form-control w-full max-w-xs space-y-3">

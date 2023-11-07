@@ -9,36 +9,77 @@ import sharp from 'sharp';
 import { googleVisionClient } from '$lib/server/gcloud';
 import { fetchBackgroundVideos } from '$lib/server/DBQueries';
 
-type TextContentInputs = {
-	ttsEngine: string;
-	subtitles: boolean;
-	randomStart: boolean;
-	bgVideoFileName: string;
-	languages: string[];
+enum TTSEngines {
+	ELEVENLABS = 'ELEVENLABS',
+	GOOGLE = 'GOOGLE'
+}
+
+enum LANGUAGES {
+	ENGLISH = 'ENGLISH',
+	SPANISH = 'SPANISH',
+	FRENCH = 'FRENCH',
+	ITALIAN = 'ITALIAN',
+	GERMAN = 'GERMAN',
+	PORTUGUESE = 'PORTUGUESE',
+	POLISH = 'POLISH',
+	HINDI = 'HINDI'
+}
+
+type ElevenLabsInputs = {
+	ttsEngine: TTSEngines.ELEVENLABS;
+	elevenlabsAPIKey: string;
+	elevenlabsVoice?: string;
+};
+
+type GoogleTTSInputs = {
+	ttsEngine: TTSEngines.GOOGLE;
+};
+
+// Create a union type that is the union of the specific TTS engine inputs.
+type TTSEngineInputs = ElevenLabsInputs | GoogleTTSInputs;
+
+type TextInputs = {
 	contentOrigin: 'text';
 	title: string;
 	description: string;
-	imageFile: File | null;
-	elevenlabsAPIKey: string | null;
 };
 
-type ScrapedContentInputs = {
-	ttsEngine: string;
-	subtitles: boolean;
-	randomStart: boolean;
-	bgVideoFileName: string;
-	languages: string[];
+type ScrapedInputs = {
 	contentOrigin: 'scraped';
 	subreddit: string;
 	minPostLength: string;
 	maxPostLength: string;
-	imageFile: File | null;
-	elevenlabsAPIKey: string | null;
 };
 
-type ContentInputs = TextContentInputs | ScrapedContentInputs | null;
+type ContentOriginInputs = TextInputs | ScrapedInputs;
 
-type CommonVideoParameters = {
+// Define the base properties that are common to all form inputs.
+type BaseInputs = {
+	subtitles: boolean;
+	randomStart: boolean;
+	bgVideoFileName: string;
+	languages: string[];
+	imageFile: File | null;
+};
+
+type ContentInputs = BaseInputs & TTSEngineInputs & ContentOriginInputs;
+
+type TextVideoParameters = {
+	CONTENT_ORIGIN: 'text';
+	TITLE: string;
+	DESCRIPTION: string;
+};
+
+type ScrapedVideoParameters = {
+	CONTENT_ORIGIN: 'scraped';
+	SUBREDDIT: string;
+	MIN_POST_LENGTH: string;
+	MAX_POST_LENGTH: string;
+};
+
+type ContentOriginParameters = TextVideoParameters | ScrapedVideoParameters;
+
+type BaseVideoParameters = {
 	TTS_ENGINE: string;
 	SUBTITLES: boolean;
 	RANDOM_START_TIME: boolean;
@@ -47,20 +88,7 @@ type CommonVideoParameters = {
 	IMAGE_FILE: File | null;
 };
 
-type TextVideoParameters = CommonVideoParameters & {
-	CONTENT_ORIGIN: 'text';
-	TITLE: string;
-	DESCRIPTION: string;
-};
-
-type ScrapedVideoParameters = CommonVideoParameters & {
-	CONTENT_ORIGIN: 'scraped';
-	SUBREDDIT: string;
-	MIN_POST_LENGTH: string;
-	MAX_POST_LENGTH: string;
-};
-
-type VideoParameters = TextVideoParameters | ScrapedVideoParameters;
+type VideoParameters = BaseVideoParameters & ContentOriginParameters;
 
 export const load = (async ({ locals }) => {
 	const userID = locals.userID!;
@@ -99,7 +127,10 @@ export const actions = {
 		formData.append('BG_VIDEO_FILENAME', inputs!.bgVideoFileName);
 		formData.append('LANGUAGES', languagesString);
 		formData.append('CONTENT_ORIGIN', inputs!.contentOrigin);
-		if (inputs!.elevenlabsAPIKey) formData.append('ELEVENLABS_API_KEY', inputs!.elevenlabsAPIKey);
+		if (inputs!.ttsEngine === TTSEngines.ELEVENLABS) {
+			formData.append('ELEVENLABS_API_KEY', inputs!.elevenlabsAPIKey);
+			if (inputs?.elevenlabsVoice) formData.append('ELEVENLABS_VOICE', inputs!.elevenlabsVoice);
+		}
 
 		if (inputs?.imageFile) formData.append('IMAGE_FILE', inputs!.imageFile);
 		if (userBGVideo) formData.append('USER_ID', userID);
@@ -175,62 +206,93 @@ export const actions = {
 	}
 } satisfies Actions;
 
-function getFormInputs(data: FormData): ContentInputs {
-	const contentOrigin = data.get('CONTENT_ORIGIN') as string;
-
-	const imageFile = data.has('IMAGE_FILE') ? (data.get('IMAGE_FILE') as File) : null;
-	let commonInputs = {
-		ttsEngine: data.get('TTS_ENGINE') as string,
-		subtitles: (data.get('SUBTITLES') as string) === 'on' ? true : false,
-		randomStart: (data.get('RANDOM_START_TIME') as string) === 'on' ? true : false,
-		bgVideoFileName: data.get('BG_VIDEO_FILENAME') as string,
-		languages: data.getAll('LANGUAGES') as string[],
-		// Get the image file from the form data if it exists
-		imageFile: imageFile && imageFile.size > 0 ? imageFile : null,
-		elevenlabsAPIKey:
-			(data.get('TTS_ENGINE') as string) === 'ELEVENLABS'
-				? (data.get('ELEVENLABS_API_KEY') as string)
-				: null
-	};
-
-	if (contentOrigin === 'text') {
-		return {
-			contentOrigin,
-			title: data.get('TITLE') as string,
-			description: data.get('DESCRIPTION') as string,
-			...commonInputs
+// We will use this function to conditionally add the API Key if the ttsEngine is 'ELEVENLABS'.
+function getTTSInputs(data: FormData): TTSEngineInputs | null {
+	const ttsEngine = data.get('TTS_ENGINE') as string;
+	if (ttsEngine === TTSEngines.ELEVENLABS) {
+		let inputs: ElevenLabsInputs = {
+			ttsEngine: ttsEngine,
+			elevenlabsAPIKey: data.get('ELEVENLABS_API_KEY') as string,
+			elevenlabsVoice:
+				data.get('ELEVENLABS_VOICE') !== null ? (data.get('ELEVENLABS_VOICE') as string) : undefined
 		};
-	} else if (contentOrigin === 'scraped') {
-		return {
-			contentOrigin,
-			subreddit: data.get('SUBREDDIT') as string,
-			minPostLength: data.get('MIN_POST_LENGTH') as string,
-			maxPostLength: data.get('MAX_POST_LENGTH') as string,
-			...commonInputs
+		return inputs;
+	} else if (ttsEngine === TTSEngines.GOOGLE) {
+		let inputs: GoogleTTSInputs = {
+			ttsEngine: ttsEngine
 		};
+		return inputs;
 	} else {
-		return null; // Handle this error condition where contentOrigin is neither 'text' nor 'scraped'
+		return null;
 	}
 }
 
-async function validateInputs(inputs: ContentInputs, allowedBGVideoFileNames: string[]) {
-	if (inputs === null) {
-		return { error: 'Invalid content origin. Must be either "text" or "scraped"' };
+function getContentOriginInputs(data: FormData): ContentOriginInputs | null {
+	const contentOrigin = data.get('CONTENT_ORIGIN') as string;
+	if (contentOrigin === 'text') {
+		let inputs: TextInputs = {
+			contentOrigin,
+			title: data.get('TITLE') as string,
+			description: data.get('DESCRIPTION') as string
+		};
+		return inputs;
+	} else if (contentOrigin === 'scraped') {
+		let inputs: ScrapedInputs = {
+			contentOrigin,
+			subreddit: data.get('SUBREDDIT') as string,
+			minPostLength: data.get('MIN_POST_LENGTH') as string,
+			maxPostLength: data.get('MAX_POST_LENGTH') as string
+		};
+		return inputs;
+	} else {
+		return null;
+	}
+}
+
+//TODO: Do validation in this function and stop potentially returning null
+function getFormInputs(data: FormData): ContentInputs | null {
+	let commonInputs: BaseInputs = {
+		subtitles: (data.get('SUBTITLES') as string) === 'on',
+		randomStart: (data.get('RANDOM_START_TIME') as string) === 'on',
+		bgVideoFileName: data.get('BG_VIDEO_FILENAME') as string,
+		languages: data.getAll('LANGUAGES') as string[],
+		imageFile: data.has('IMAGE_FILE')
+			? (data.get('IMAGE_FILE') as File).size > 0
+				? (data.get('IMAGE_FILE') as File)
+				: null
+			: null
+	};
+
+	let TTSInputs: TTSEngineInputs | null = getTTSInputs(data);
+	if (TTSInputs === null) {
+		return null;
 	}
 
-	const allowedTTSEngines = ['GOOGLE', 'ELEVENLABS'];
-	const allowedLanguages = [
-		'ENGLISH',
-		'SPANISH',
-		'FRENCH',
-		'ITALIAN',
-		'GERMAN',
-		'PORTUGUESE',
-		'POLISH',
-		'HINDI'
-	];
+	let contentOriginInputs: ContentOriginInputs | null = getContentOriginInputs(data);
+	if (contentOriginInputs === null) {
+		return null;
+	}
+
+	let inputs: ContentInputs = {
+		...commonInputs,
+		...TTSInputs,
+		...contentOriginInputs
+	};
+	return inputs;
+}
+
+async function validateInputs(inputs: ContentInputs | null, allowedBGVideoFileNames: string[]) {
+	if (inputs === null) {
+		return { error: 'Invalid data submitted' };
+	}
+
+	// Create an array from the enum
+	const allowedTTSEngines: TTSEngines[] = Object.values(TTSEngines);
+	const allowedLanguages: LANGUAGES[] = Object.values(LANGUAGES) as LANGUAGES[];
+
 	if (inputs.imageFile !== null) {
 		if (!['image/png', 'image/jpeg'].includes(inputs.imageFile.type)) {
+			console.log(inputs);
 			return { error: 'Invalid file type. Only PNG and JPG are allowed.' };
 		}
 		if (inputs.imageFile.size > 1000000) {
@@ -270,7 +332,7 @@ async function validateInputs(inputs: ContentInputs, allowedBGVideoFileNames: st
 		};
 	}
 	if (
-		inputs.ttsEngine === 'ELEVENLABS' &&
+		inputs.ttsEngine === TTSEngines.ELEVENLABS &&
 		(inputs.elevenlabsAPIKey === '' || !inputs.elevenlabsAPIKey)
 	) {
 		return {
@@ -292,7 +354,7 @@ async function validateInputs(inputs: ContentInputs, allowedBGVideoFileNames: st
 			error: 'Must select at least one language'
 		};
 	}
-	if (!inputs.languages.every((language) => allowedLanguages.includes(language))) {
+	if (!inputs.languages.every(isLanguage)) {
 		return {
 			error: 'Must enter valid languages'
 		};
@@ -359,6 +421,11 @@ async function validateInputs(inputs: ContentInputs, allowedBGVideoFileNames: st
 	}
 
 	return null; // Return null if validation passes
+}
+
+// Type guard to check if a string is a key of the LANGUAGES enum
+function isLanguage(value: string): value is LANGUAGES {
+	return Object.values(LANGUAGES).includes(value as LANGUAGES);
 }
 
 async function safeSearchPassed(imageBuffer: Buffer): Promise<boolean> {

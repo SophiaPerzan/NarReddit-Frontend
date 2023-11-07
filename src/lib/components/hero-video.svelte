@@ -3,7 +3,7 @@
 	export let videoUrlAlt: string;
 </script>
 
-<div class="hero min-h-screen relative overflow-hidden">
+<div class="hero min-h-dynamic-screen relative overflow-hidden">
 	<video
 		autoplay
 		loop
@@ -22,3 +22,9 @@
 		<slot />
 	</div>
 </div>
+
+<style>
+	.min-h-dynamic-screen {
+		min-height: 100dvh;
+	}
+</style>
