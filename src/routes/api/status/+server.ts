@@ -1,11 +1,13 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDB } from '$lib/server/admin';
+import { adminDB, adminStorageBucket } from '$lib/server/admin';
 import { NARREDDIT_API_KEY } from '$env/static/private';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const userID = locals.userID!;
 	const { taskID } = await request.json();
+	console.log(userID);
+	console.log(taskID);
 	const query = adminDB
 		.collection('videos')
 		.where('userID', '==', userID)
@@ -36,7 +38,19 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	if (querySnapshot.empty) {
 		throw new Error('No such document!');
 	}
-	querySnapshot.docs[0].ref.update({ status: resData.status });
-
-	return json({ status: resData.status });
+	if (resData.status === 'unknown') {
+		//determine if the video exists on gcp storage
+		const fileRef = adminStorageBucket.file(userID + '/videos/' + docId + '.zip');
+		const fileExists = (await fileRef.exists())[0];
+		if (fileExists) {
+			querySnapshot.docs[0].ref.update({ status: 'finished' });
+			return json({ status: 'finished' });
+		} else {
+			querySnapshot.docs[0].ref.update({ status: 'failed' });
+			return json({ status: 'failed' });
+		}
+	} else {
+		querySnapshot.docs[0].ref.update({ status: resData.status });
+		return json({ status: resData.status });
+	}
 };
