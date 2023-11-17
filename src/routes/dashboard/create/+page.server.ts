@@ -94,6 +94,11 @@ export const load = (async ({ locals }) => {
 	const userID = locals.userID!;
 	let backgroundVideos = await fetchBackgroundVideos(userID);
 	backgroundVideos = backgroundVideos.filter((video) => video.status === 'uploaded');
+	if (backgroundVideos.length === 0) {
+		backgroundVideos = (await fetchBackgroundVideos('default')).filter(
+			(video) => video.status === 'uploaded'
+		);
+	}
 	return { backgroundVideos };
 }) satisfies PageServerLoad;
 
@@ -102,11 +107,16 @@ export const actions = {
 		const userID = locals.userID!;
 		const data = await request.formData();
 		const inputs = getFormInputs(data);
-		const bgVideos = await fetchBackgroundVideos(userID);
-		let bgVideoFilenames = ['MCParkour.mp4', 'SubwaySurfers.mp4', 'Mirrors-Edge.mp4', 'RANDOM'];
+		const userBGVideos = await fetchBackgroundVideos(userID);
+
+		let bgVideoFilenames = (await fetchBackgroundVideos('default')).map(
+			(video) => video.VideoName as string
+		);
+		bgVideoFilenames.push('RANDOM');
+
 		let userBGVideo = false;
-		if (bgVideos.length > 0) {
-			bgVideoFilenames = bgVideos.map((video) => video.VideoName);
+		if (userBGVideos.length > 0) {
+			bgVideoFilenames = userBGVideos.map((video) => video.VideoName);
 			bgVideoFilenames.push('RANDOM');
 			userBGVideo = true;
 		}
@@ -114,6 +124,21 @@ export const actions = {
 
 		if (validationError) {
 			return validationError; // This will include the error from the content origin
+		}
+		//If we choose a random video, we should select it now so we can send a reference
+		//to the file to the video creation pipeline
+		if (inputs!.bgVideoFileName === 'RANDOM') {
+			//remove random as an option, since we need to send a reference to a file
+			let possibleVideos = bgVideoFilenames.filter((videoName) => videoName !== 'RANDOM');
+			const randomIndex = Math.floor(Math.random() * possibleVideos.length);
+			//get a random filename
+			inputs!.bgVideoFileName = possibleVideos[randomIndex];
+		}
+		//Set the filename to its GCP Storage object name
+		if (userBGVideo) {
+			inputs!.bgVideoFileName = userID + '/backgrounds/' + inputs!.bgVideoFileName;
+		} else {
+			inputs!.bgVideoFileName = 'default' + '/backgrounds/' + inputs!.bgVideoFileName;
 		}
 		const languagesString = inputs!.languages.join(',');
 
@@ -127,20 +152,25 @@ export const actions = {
 		formData.append('BG_VIDEO_FILENAME', inputs!.bgVideoFileName);
 		formData.append('LANGUAGES', languagesString);
 		formData.append('CONTENT_ORIGIN', inputs!.contentOrigin);
+		formData.append('USER_ID', userID);
 		if (inputs!.ttsEngine === TTSEngines.ELEVENLABS) {
 			formData.append('ELEVENLABS_API_KEY', inputs!.elevenlabsAPIKey);
 			if (inputs?.elevenlabsVoice) formData.append('ELEVENLABS_VOICE', inputs!.elevenlabsVoice);
 		}
 
 		if (inputs?.imageFile) formData.append('IMAGE_FILE', inputs!.imageFile);
-		if (userBGVideo) formData.append('USER_ID', userID);
+
+		//The inputs.bgVideoFileName is now a reference to the GCP Storage object, so we want to just
+		//get the base filename in order to save that to the DB
+		const parts = inputs!.bgVideoFileName.split('/');
+		const baseName = parts[parts.length - 1];
 
 		if (inputs!.contentOrigin === 'text') {
 			videoParameters = {
 				TTS_ENGINE: inputs!.ttsEngine,
 				SUBTITLES: inputs!.subtitles,
 				RANDOM_START_TIME: inputs!.randomStart,
-				BG_VIDEO_FILENAME: inputs!.bgVideoFileName,
+				BG_VIDEO_FILENAME: baseName,
 				LANGUAGES: languagesString,
 				CONTENT_ORIGIN: inputs!.contentOrigin,
 				TITLE: inputs!.title,
@@ -155,7 +185,7 @@ export const actions = {
 				TTS_ENGINE: inputs!.ttsEngine,
 				SUBTITLES: inputs!.subtitles,
 				RANDOM_START_TIME: inputs!.randomStart,
-				BG_VIDEO_FILENAME: inputs!.bgVideoFileName,
+				BG_VIDEO_FILENAME: baseName,
 				LANGUAGES: languagesString,
 				CONTENT_ORIGIN: inputs!.contentOrigin,
 				SUBREDDIT: inputs!.subreddit,
@@ -191,13 +221,23 @@ export const actions = {
 				'Api-Key': NARREDDIT_API_KEY
 			}
 		});
+		//IF THE VIDEO CREATION API ERRORS, A TASKID MAY NOT BE RETURNED
+		//THIS WILL MAKE IT IMPOSSIBLE TO UPDATE AND DELETE THE VIDEO DOC
 		const { status, task_id } = await response.json();
+
+		if (!task_id) return { error: 'Video creation pipeline failed' };
 
 		if (status === 'started') {
 			await docRef.update({
 				status: 'processing',
 				taskID: task_id
 			});
+			let statsDocRef = await adminDB.collection('stats').doc('videos');
+			let statsDoc = await statsDocRef.get();
+			let totalVids = statsDoc.data()?.totalVideos;
+			if (totalVids) {
+				statsDocRef.update({ totalVideos: totalVids + 1 });
+			}
 		}
 
 		return {
