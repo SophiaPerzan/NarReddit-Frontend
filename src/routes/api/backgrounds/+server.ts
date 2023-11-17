@@ -42,17 +42,23 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'No file uploaded' });
 		}
 		if (!(videoFileMetadata.contentType === 'video/mp4')) {
-			videoFileObject.delete();
+			if ((await videoFileObject.exists())[0] === true) {
+				videoFileObject.delete();
+			}
 			return json({ error: 'Invalid file extension. File must be .mp4' });
 		}
 		if (videoFileMetadata.size > 500000000) {
-			videoFileObject.delete();
+			if ((await videoFileObject.exists())[0] === true) {
+				videoFileObject.delete();
+			}
 			return json({ error: 'File size too large. File must be less than 500MB' });
 		}
 		// Check if the filename is well-formed
 		const fileName = videoFileMetadata.name.split('/').pop();
 		if (!validFilenamePattern.test(fileName)) {
-			videoFileObject.delete();
+			if ((await videoFileObject.exists())[0] === true) {
+				videoFileObject.delete();
+			}
 			return json({
 				error: 'Filename must contain only alphanumeric characters, dashes, and underscores.'
 			});
@@ -107,18 +113,6 @@ export const DELETE: RequestHandler = async ({ request, locals }) => {
 		throw new Error('Unauthorized');
 	} else {
 		const fileName = await docSnapshot.data()!.VideoName;
-		//could possibly await fetch, but I don't think it's necessary
-		fetch('http://localhost:5000/background/delete', {
-			method: 'POST',
-			body: JSON.stringify({
-				FILENAME: fileName,
-				USER_ID: userID
-			}),
-			headers: {
-				'Content-Type': 'application/json',
-				'Api-Key': NARREDDIT_API_KEY
-			}
-		});
 		const gcpFile = adminStorageBucket.file(userID + '/backgrounds/' + fileName);
 		//take [0] as that is the result of the promise (if the file exists)
 		if ((await gcpFile.exists())[0] === true) {
@@ -144,7 +138,9 @@ async function processInBackground(
 			console.log('Video failed safe search');
 			if (await docExists(docRef)) await docRef.update({ status: 'failed' });
 			const gcpFile = adminStorageBucket.file(userID + '/backgrounds/' + fileName);
-			await gcpFile.delete();
+			if ((await gcpFile.exists())[0] === true) {
+				await gcpFile.delete();
+			}
 
 			if (isSafe.error) {
 				console.error(isSafe.error);

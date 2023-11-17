@@ -52,6 +52,9 @@
 		// Set the href to the file URL
 		a.href = url;
 
+		// Set the download attribute to a custom file name
+		//a.download = 'NarReddit-Video.zip';
+
 		// Use the Content-Disposition header to get the original file name
 		//const contentDisposition = res.headers.get('Content-Disposition');
 		//if (contentDisposition) {
