@@ -136,7 +136,7 @@ async function processInBackground(
 		const isSafe = await safeSearchPassed(videoFile);
 		if (isSafe.error || !isSafe.passed) {
 			console.log('Video failed safe search');
-			if (await docExists(docRef)) await docRef.update({ status: 'failed' });
+			if (await docExists(docRef)) await docRef.update({ status: 'failed: content detection' });
 			const gcpFile = adminStorageBucket.file(userID + '/backgrounds/' + fileName);
 			if ((await gcpFile.exists())[0] === true) {
 				await gcpFile.delete();
@@ -147,43 +147,13 @@ async function processInBackground(
 			}
 			return;
 		}
-		const body = new FormData();
-		body.append('VIDEO_FILE', videoFile, fileName);
-		body.append('USER_ID', userID!);
 		if (await docExists(docRef)) {
-			await docRef.update({ status: 'uploading' });
+			await docRef.update({ status: 'uploaded' });
 		} else {
-			return;
-		}
-		const response = await fetch('http://localhost:5000/background', {
-			method: 'POST',
-			body: body,
-			headers: {
-				'Api-Key': NARREDDIT_API_KEY
+			const gcpFile = adminStorageBucket.file(userID + '/backgrounds/' + fileName);
+			if ((await gcpFile.exists())[0] === true) {
+				await gcpFile.delete();
 			}
-		});
-		const { status } = await response.json();
-		if (status === 'success') {
-			if (await docExists(docRef)) {
-				await docRef.update({ status: 'uploaded' });
-			} else {
-				fetch('http://localhost:5000/background/delete', {
-					method: 'POST',
-					body: JSON.stringify({
-						FILENAME: fileName,
-						USER_ID: userID
-					}),
-					headers: {
-						'Content-Type': 'application/json',
-						'Api-Key': NARREDDIT_API_KEY
-					}
-				});
-				return;
-			}
-			return { status: 'success' };
-		} else {
-			if (await docExists(docRef)) await docRef.update({ status: 'failed' });
-			return { error: 'Error uploading video' };
 		}
 	} catch (error) {
 		// Handle any errors that occur during background processing
