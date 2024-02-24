@@ -107,7 +107,7 @@ export const actions = {
 		const userID = locals.userID!;
 		const data = await request.formData();
 		const inputs = getFormInputs(data);
-		const userBGVideos = await fetchBackgroundVideos(userID);
+		const userBGVideos = (await fetchBackgroundVideos(userID)).filter((video) => video.status === 'uploaded');
 
 		let bgVideoFilenames = (await fetchBackgroundVideos('default')).map(
 			(video) => video.VideoName as string
