@@ -8,6 +8,7 @@ import sharp from 'sharp';
 
 import { googleVisionClient } from '$lib/server/gcloud';
 import { fetchBackgroundVideos } from '$lib/server/DBQueries';
+import { VIDEO_PIPELINE_URL } from '$lib';
 
 enum TTSEngines {
 	ELEVENLABS = 'ELEVENLABS',
@@ -214,7 +215,7 @@ export const actions = {
 		const docID = docRef.id;
 		formData.append('DOC_ID', docID);
 
-		const response = await fetch('http://localhost:5000/create', {
+		const response = await fetch(VIDEO_PIPELINE_URL+'/create', {
 			method: 'POST',
 			body: formData,
 			headers: {
