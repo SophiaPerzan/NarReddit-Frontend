@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminDB, adminStorageBucket } from '$lib/server/admin';
 import { NARREDDIT_API_KEY } from '$env/static/private';
+import { VIDEO_PIPELINE_URL } from '$lib';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const userID = locals.userID!;
@@ -17,7 +18,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		throw new Error('No such document!');
 	}
 	let docId = snapshot.docs[0].id;
-	const res = await fetch('http://localhost:5000/status', {
+	const res = await fetch(VIDEO_PIPELINE_URL+'/status', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',

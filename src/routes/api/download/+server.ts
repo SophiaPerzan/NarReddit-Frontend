@@ -31,44 +31,4 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			message: 'file does not exist'
 		});
 	}
-
-	//NOT NEEDED ANYMORE AS VIDEO CREATION CONTAINERS UPLOAD TO GCP STORAGE DIRECTLY
-	//const res = await fetch('http://localhost:5000/download', {
-	//	method: 'POST',
-	//	headers: {
-	//		'Content-Type': 'application/json',
-	//		'Api-Key': NARREDDIT_API_KEY
-	//	},
-	//	body: JSON.stringify({
-	//		DOC_ID: docId
-	//	})
-	//});
-	//// Check if the fetch was successful
-	//if (!res.ok) {
-	//	throw new Error('Fetch failed');
-	//}
-	//
-	//// Get the content type from the fetch response
-	//const contentType = res.headers.get('Content-Type') || 'application/octet-stream';
-	//
-	//// Get the content disposition from the fetch response
-	//const contentDisposition = res.headers.get('Content-Disposition') || 'attachment';
-	//
-	//// Get the file data from the fetch response
-	//const data = await res.arrayBuffer();
-	//
-	////get a buffer from the arraybuffer
-	//const buffer = Buffer.from(data);
-	//
-	//await fileRef.save(buffer, {
-	//	metadata: {
-	//		contentDisposition: contentDisposition
-	//	}
-	//});
-	//const downloadLink = await getDownloadURL(fileRef);
-	//
-	//return json({
-	//	status: 'success',
-	//	downloadLink: downloadLink
-	//});
 };
